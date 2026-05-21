@@ -129,7 +129,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global DB connector hook to share dynamic configurations inside React scope safely
+        // Connect directly to the high-performance isolated live database
         window.FirebaseConnector = {
             initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, getDoc, setDoc, onSnapshot
         };
@@ -139,7 +139,7 @@
         const { useState, useEffect, useLayoutEffect, useRef } = React;
         gsap.registerPlugin(ScrollTrigger);
 
-        // --- Core Static Layout Fallbacks (Used if Firestore database is empty) ---
+        // Curated Luxury Presets (Backup Layout Fallbacks)
         const INITIAL_DEFAULT_CONFIG = {
             hero: {
                 titleLine1: "Curated",
@@ -231,7 +231,7 @@
             }
         };
 
-        // --- Custom Interactive Cursor Component ---
+        // --- Custom Trailing Cursor ---
         const CustomCursor = () => {
             const dotRef = useRef(null);
             const outlineRef = useRef(null);
@@ -325,7 +325,7 @@
             );
         };
 
-        // --- Modern Hero Section with slow zoom parallax ---
+        // --- Modern Hero Section with zoom parallax ---
         const Hero = ({ data }) => {
             const heroRef = useRef(null);
 
@@ -382,7 +382,7 @@
             );
         };
 
-        // --- Brand Authority Infinite Location Marquee ---
+        // --- Location Marquee ---
         const Marquee = () => {
             const locations = ["C-Scheme", "Vaishali Nagar", "Malviya Nagar", "Jagatpura", "Bapu Nagar", "DCM"];
             return (
@@ -405,7 +405,7 @@
             );
         };
 
-        // --- Strategic Mission and Vision Section ---
+        // --- Strategic Vision Section ---
         const Vision = ({ data }) => {
             const sectionRef = useRef(null);
 
@@ -436,8 +436,8 @@
             );
         };
 
-        // --- Curator Profile: Meet the Founder ---
-        const Founder = ({ data }) => {
+        // --- Curator Profile: Meet the Founder with 7-Tap Secret Door ---
+        const Founder = ({ data, onPhotoClick }) => {
             const sectionRef = useRef(null);
             
             useLayoutEffect(() => {
@@ -476,14 +476,22 @@
                             </p>
                         </div>
                         <div className="w-full md:w-1/2 founder-reveal relative">
-                            <div className="aspect-[3/4] rounded-xl overflow-hidden bg-prime-pearl relative shadow-sm">
+                            {/* Tap 7 times secretly to unlock Curator Panel */}
+                            <div 
+                                onClick={onPhotoClick}
+                                className="aspect-[3/4] rounded-xl overflow-hidden bg-prime-pearl relative shadow-sm cursor-pointer select-none group"
+                                title="Tap 7 times to unlock Curator Panel"
+                            >
                                 <img 
                                     src={data?.image} 
                                     alt="Ashish Yadav - Founder of SM Prime Realty" 
-                                    className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700" 
+                                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700" 
                                     onError={(e) => { e.target.src = INITIAL_DEFAULT_CONFIG.founder.image }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-prime-ink/20 to-transparent"></div>
+                                <div className="absolute bottom-4 left-4 bg-prime-pearl/80 backdrop-blur-sm px-2.5 py-1 rounded-full text-[8px] uppercase tracking-widest font-semibold text-prime-ink border border-prime-ink/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Curator Mode Portal
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -491,7 +499,7 @@
             );
         };
 
-        // --- Interactive Premium Amenities Segment (Accordion Panel) ---
+        // --- Interactive Amenities accordion ---
         const Amenities = ({ items }) => {
             const [activeImg, setActiveImg] = useState(0);
             const amenitiesList = items || INITIAL_DEFAULT_CONFIG.amenities;
@@ -537,7 +545,7 @@
             );
         };
 
-        // --- Filterable Portfolio System with Instagram Video Tours ---
+        // --- Dynamic Filterable Portfolio with Quick-View & cinematic tours ---
         const Portfolio = ({ items, contactData }) => {
             const [filter, setFilter] = useState('All');
             const [selectedProject, setSelectedProject] = useState(null);
@@ -608,10 +616,10 @@
                         </div>
                     </div>
 
-                    {/* Quick View Dynamic Modal */}
+                    {/* Dynamic Cinematic Modal */}
                     {selectedProject && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 glass-modal transition-opacity duration-300">
-                            <div className="bg-prime-pearl w-full max-w-5xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative border border-prime-ink/5 max-h-[90vh] md:max-h-none overflow-y-auto md:overflow-visible">
+                            <div className="bg-prime-pearl w-full max-w-5xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative border border-prime-ink/5 max-h-[90vh] md:max-h-none overflow-y-auto md:overflow-visible animate-[fadeIn_0.3s_forwards]">
                                 <button onClick={() => setSelectedProject(null)} className="absolute top-4 right-4 z-10 w-10 h-10 bg-prime-surface border border-prime-ink/10 text-prime-ink rounded-full flex items-center justify-center hover-trigger hover:bg-prime-ink hover:text-prime-pearl transition-colors shadow-sm">✕</button>
                                 <div className="w-full md:w-1/2 h-[30vh] md:h-[65vh] relative bg-prime-surface">
                                     <img 
@@ -669,7 +677,7 @@
             );
         };
 
-        // --- Connect & Dynamic Footer Section ---
+        // --- Connect & Footer ---
         const Footer = ({ data }) => {
             const [formData, setFormData] = useState({ name: '', message: '' });
             const [error, setError] = useState('');
@@ -771,39 +779,33 @@
             );
         };
 
-        // --- Custom Elegant CMS Admin Panel Component ---
-        const AdminPanel = ({ currentConfig, onSaveConfig, onClose }) => {
+        // --- Live CMS Curation Panel Drawer ---
+        const AdminPanel = ({ currentConfig, onSaveConfig, onClose, isDatabaseConnected }) => {
             const [activeTab, setActiveTab] = useState('hero');
             const [config, setConfig] = useState(JSON.parse(JSON.stringify(currentConfig)));
 
-            // Hero section handlers
             const updateHero = (key, val) => {
                 setConfig(prev => ({ ...prev, hero: { ...prev.hero, [key]: val } }));
             };
 
-            // Vision section handlers
             const updateVision = (key, val) => {
                 setConfig(prev => ({ ...prev, vision: { ...prev.vision, [key]: val } }));
             };
 
-            // Founder section handlers
             const updateFounder = (key, val) => {
                 setConfig(prev => ({ ...prev, founder: { ...prev.founder, [key]: val } }));
             };
 
-            // Contact section handlers
             const updateContact = (key, val) => {
                 setConfig(prev => ({ ...prev, contact: { ...prev.contact, [key]: val } }));
             };
 
-            // Amenities section handlers
             const updateAmenity = (index, key, val) => {
                 const updated = [...config.amenities];
                 updated[index][key] = val;
                 setConfig(prev => ({ ...prev, amenities: updated }));
             };
 
-            // Portfolio Project CRUD handlers
             const updateProject = (index, key, val) => {
                 const updated = [...config.projects];
                 updated[index][key] = val;
@@ -818,7 +820,7 @@
                     size: "5,000 Sq Ft",
                     location: "C-Scheme, Jaipur",
                     img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600",
-                    desc: "Enter a brief luxury summary describing the unique layout, customized architectural panels, and strategic location advantages.",
+                    desc: "Enter architectural summary describing the layout and features.",
                     reelUrl: "https://www.instagram.com/reel/DW3Ow31kznq/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
                 };
                 setConfig(prev => ({ ...prev, projects: [...prev.projects, newProj] }));
@@ -830,20 +832,25 @@
             };
 
             return (
-                <div className="fixed inset-y-0 right-0 z-[120] w-full max-w-2xl bg-prime-pearl shadow-2xl flex flex-col border-l border-prime-ink/10 text-prime-ink animate-[slideIn_0.4s_cubic-bezier(0.16,1,0.3,1)]">
+                <div className="fixed inset-y-0 right-0 z-[120] w-full max-w-2xl bg-prime-pearl shadow-2xl flex flex-col border-l border-prime-ink/10 text-prime-ink h-screen max-h-screen overflow-hidden animate-[slideIn_0.4s_cubic-bezier(0.16,1,0.3,1)]">
                     <style>{`@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
                     
-                    {/* Panel Header */}
+                    {/* Header */}
                     <div className="p-6 border-b border-prime-ink/10 flex justify-between items-center bg-prime-surface">
                         <div>
                             <h2 className="font-serif text-2xl tracking-wide uppercase">Curation Engine</h2>
-                            <p className="text-[10px] uppercase tracking-widest text-prime-gold font-semibold">SM Prime Live CMS</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] uppercase tracking-widest text-prime-gold font-semibold">SM Prime Live CMS</span>
+                                <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1.5 ${isDatabaseConnected ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                                    <span>{isDatabaseConnected ? '🟢 Cloud Sync Active' : '🔴 Preview Mode'}</span>
+                                </span>
+                            </div>
                         </div>
                         <button onClick={onClose} className="p-2 border border-prime-ink/10 rounded-full hover:bg-prime-ink hover:text-prime-pearl transition-colors hover-trigger">✕</button>
                     </div>
 
-                    {/* Tab Navigation */}
-                    <div className="flex border-b border-prime-ink/5 overflow-x-auto whitespace-nowrap bg-prime-pearl">
+                    {/* Navigation Tabs */}
+                    <div className="flex border-b border-prime-ink/5 overflow-x-auto whitespace-nowrap bg-prime-pearl min-h-[48px] shrink-0">
                         {['hero', 'vision', 'founder', 'amenities', 'portfolio', 'contact'].map(tab => (
                             <button 
                                 key={tab}
@@ -855,85 +862,85 @@
                         ))}
                     </div>
 
-                    {/* Editor Form Area */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    {/* Scrollable Form Workspace */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ maxHeight: 'calc(100vh - 170px)' }}>
                         
-                        {/* HERO TAB */}
+                        {/* HERO */}
                         {activeTab === 'hero' && (
                             <div className="space-y-4">
                                 <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Hero Visual Layout</h3>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Title Main Accent</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.hero.titleLine1} onChange={(e) => updateHero('titleLine1', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.hero.titleLine1} onChange={(e) => updateHero('titleLine1', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Title Secondary (Italic Gold)</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent font-serif italic" value={config.hero.titleLine2} onChange={(e) => updateHero('titleLine2', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent font-serif italic focus:border-prime-gold focus:outline-none" value={config.hero.titleLine2} onChange={(e) => updateHero('titleLine2', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Sub-heading Slogan</label>
-                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-20 text-xs" value={config.hero.subtitle} onChange={(e) => updateHero('subtitle', e.target.value)} />
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-20 text-xs focus:border-prime-gold focus:outline-none" value={config.hero.subtitle} onChange={(e) => updateHero('subtitle', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Hero Background Image URL</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={config.hero.bgImage} onChange={(e) => updateHero('bgImage', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs focus:border-prime-gold focus:outline-none" value={config.hero.bgImage} onChange={(e) => updateHero('bgImage', e.target.value)} />
                                     <img src={config.hero.bgImage} className="mt-2 w-full h-32 object-cover rounded" onError={(e) => { e.target.src = "https://placehold.co/800x600/EFEFEA/111111?text=Preview" }} />
                                 </div>
                             </div>
                         )}
 
-                        {/* VISION TAB */}
+                        {/* VISION */}
                         {activeTab === 'vision' && (
                             <div className="space-y-4">
                                 <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Vision Statements</h3>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Tagline Label</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.vision.tagline} onChange={(e) => updateVision('tagline', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.vision.tagline} onChange={(e) => updateVision('tagline', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Impact Headline</label>
-                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed" value={config.vision.headline} onChange={(e) => updateVision('headline', e.target.value)} />
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed focus:border-prime-gold focus:outline-none" value={config.vision.headline} onChange={(e) => updateVision('headline', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Vision Narrative Description</label>
-                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-32 text-xs leading-relaxed" value={config.vision.description} onChange={(e) => updateVision('description', e.target.value)} />
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-32 text-xs leading-relaxed focus:border-prime-gold focus:outline-none" value={config.vision.description} onChange={(e) => updateVision('description', e.target.value)} />
                                 </div>
                             </div>
                         )}
 
-                        {/* FOUNDER TAB */}
+                        {/* FOUNDER */}
                         {activeTab === 'founder' && (
                             <div className="space-y-4">
                                 <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Founder Profile</h3>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Founder Name</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.founder.name} onChange={(e) => updateFounder('name', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.founder.name} onChange={(e) => updateFounder('name', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Professional Title</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.founder.title} onChange={(e) => updateFounder('title', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.founder.title} onChange={(e) => updateFounder('title', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Signature Direct Quote</label>
-                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 font-serif italic text-xs leading-relaxed" value={config.founder.quote} onChange={(e) => updateFounder('quote', e.target.value)} />
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 font-serif italic text-xs leading-relaxed focus:border-prime-gold focus:outline-none" value={config.founder.quote} onChange={(e) => updateFounder('quote', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Biography Paragraph 1</label>
-                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed" value={config.founder.bioParagraph1} onChange={(e) => updateFounder('bioParagraph1', e.target.value)} />
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed focus:border-prime-gold focus:outline-none" value={config.founder.bioParagraph1} onChange={(e) => updateFounder('bioParagraph1', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Biography Paragraph 2</label>
-                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed" value={config.founder.bioParagraph2} onChange={(e) => updateFounder('bioParagraph2', e.target.value)} />
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed focus:border-prime-gold focus:outline-none" value={config.founder.bioParagraph2} onChange={(e) => updateFounder('bioParagraph2', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Founder Photo URL</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={config.founder.image} onChange={(e) => updateFounder('image', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs focus:border-prime-gold focus:outline-none" value={config.founder.image} onChange={(e) => updateFounder('image', e.target.value)} />
                                     <img src={config.founder.image} className="mt-2 h-44 w-32 object-cover rounded shadow" onError={(e) => { e.target.src = INITIAL_DEFAULT_CONFIG.founder.image }} />
                                 </div>
                             </div>
                         )}
 
-                        {/* AMENITIES TAB */}
+                        {/* AMENITIES */}
                         {activeTab === 'amenities' && (
                             <div className="space-y-6">
                                 <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Uncompromising Standards</h3>
@@ -942,22 +949,22 @@
                                         <span className="text-[9px] font-bold tracking-widest text-prime-gold uppercase block">Standard #{index + 1}</span>
                                         <div>
                                             <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Feature Title</label>
-                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={item.title} onChange={(e) => updateAmenity(index, 'title', e.target.value)} />
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={item.title} onChange={(e) => updateAmenity(index, 'title', e.target.value)} />
                                         </div>
                                         <div>
                                             <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Description</label>
-                                            <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-16 text-xs" value={item.desc} onChange={(e) => updateAmenity(index, 'desc', e.target.value)} />
+                                            <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-16 text-xs focus:border-prime-gold focus:outline-none" value={item.desc} onChange={(e) => updateAmenity(index, 'desc', e.target.value)} />
                                         </div>
                                         <div>
                                             <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Background Image URL</label>
-                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={item.img} onChange={(e) => updateAmenity(index, 'img', e.target.value)} />
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs focus:border-prime-gold focus:outline-none" value={item.img} onChange={(e) => updateAmenity(index, 'img', e.target.value)} />
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        {/* PORTFOLIO TAB */}
+                        {/* PORTFOLIO */}
                         {activeTab === 'portfolio' && (
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center border-b border-prime-ink/5 pb-2">
@@ -973,11 +980,11 @@
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
                                                 <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Property Title</label>
-                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.title} onChange={(e) => updateProject(index, 'title', e.target.value)} />
+                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={proj.title} onChange={(e) => updateProject(index, 'title', e.target.value)} />
                                             </div>
                                             <div>
                                                 <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Category Type</label>
-                                                <select className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.type} onChange={(e) => updateProject(index, 'type', e.target.value)}>
+                                                <select className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none text-xs" value={proj.type} onChange={(e) => updateProject(index, 'type', e.target.value)}>
                                                     <option value="Commercial">Commercial</option>
                                                     <option value="Residential">Residential</option>
                                                 </select>
@@ -986,76 +993,76 @@
 
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Zone Area Size (e.g. 18,500 Sq Ft)</label>
-                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.size} onChange={(e) => updateProject(index, 'size', e.target.value)} />
+                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Zone Area Size</label>
+                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={proj.size} onChange={(e) => updateProject(index, 'size', e.target.value)} />
                                             </div>
                                             <div>
-                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Location Suburb (e.g. C-Scheme)</label>
-                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.location} onChange={(e) => updateProject(index, 'location', e.target.value)} />
+                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Location Suburb</label>
+                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={proj.location} onChange={(e) => updateProject(index, 'location', e.target.value)} />
                                             </div>
                                         </div>
 
                                         <div>
                                             <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Detailed Description (Inside Modal)</label>
-                                            <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-20 text-xs leading-relaxed" value={proj.desc} onChange={(e) => updateProject(index, 'desc', e.target.value)} />
+                                            <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-20 text-xs leading-relaxed focus:border-prime-gold focus:outline-none" value={proj.desc} onChange={(e) => updateProject(index, 'desc', e.target.value)} />
                                         </div>
 
                                         <div>
                                             <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">High-Res Card Image URL</label>
-                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={proj.img} onChange={(e) => updateProject(index, 'img', e.target.value)} />
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs focus:border-prime-gold focus:outline-none" value={proj.img} onChange={(e) => updateProject(index, 'img', e.target.value)} />
                                         </div>
 
                                         <div>
                                             <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Instagram Cinematic Reel URL</label>
-                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs font-mono" value={proj.reelUrl} onChange={(e) => updateProject(index, 'reelUrl', e.target.value)} />
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs font-mono focus:border-prime-gold focus:outline-none" value={proj.reelUrl} onChange={(e) => updateProject(index, 'reelUrl', e.target.value)} />
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        {/* CONTACT TAB */}
+                        {/* CONTACT */}
                         {activeTab === 'contact' && (
                             <div className="space-y-4">
                                 <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Footer Contact Details</h3>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Office Line Address 1</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.address1} onChange={(e) => updateContact('address1', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.contact.address1} onChange={(e) => updateContact('address1', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Office Line Address 2</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.address2} onChange={(e) => updateContact('address2', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.contact.address2} onChange={(e) => updateContact('address2', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Office Line Address 3</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.address3} onChange={(e) => updateContact('address3', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.contact.address3} onChange={(e) => updateContact('address3', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">State & Country Line</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.addressState} onChange={(e) => updateContact('addressState', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.contact.addressState} onChange={(e) => updateContact('addressState', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Instagram Username Display (e.g. @smprimerealty)</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.instagram} onChange={(e) => updateContact('instagram', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.contact.instagram} onChange={(e) => updateContact('instagram', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Direct Instagram Hyperlink</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={config.contact.instagramLink} onChange={(e) => updateContact('instagramLink', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs focus:border-prime-gold focus:outline-none" value={config.contact.instagramLink} onChange={(e) => updateContact('instagramLink', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">System Action Call Phone (Format: +91...)</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.phone} onChange={(e) => updateContact('phone', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.contact.phone} onChange={(e) => updateContact('phone', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Formatted Visual Phone (Format: +91 86...)</label>
-                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.phoneFormatted} onChange={(e) => updateContact('phoneFormatted', e.target.value)} />
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent focus:border-prime-gold focus:outline-none" value={config.contact.phoneFormatted} onChange={(e) => updateContact('phoneFormatted', e.target.value)} />
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Panel Footer Controls */}
-                    <div className="p-4 border-t border-prime-ink/10 bg-prime-surface flex gap-3">
+                    {/* Footer Actions */}
+                    <div className="p-4 border-t border-prime-ink/10 bg-prime-surface flex gap-3 shrink-0">
                         <button 
                             onClick={() => onSaveConfig(config)}
                             className="flex-1 py-3 bg-prime-gold text-prime-ink text-[10px] font-bold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors rounded-lg hover-trigger"
@@ -1073,22 +1080,25 @@
             );
         };
 
-        // --- Main App Root Component ---
+        // --- Main App Entrypoint with Instant Realtime Engine ---
         const App = () => {
             const [loading, setLoading] = useState(true);
             const [config, setConfig] = useState(INITIAL_DEFAULT_CONFIG);
             const [isAdminOpen, setIsAdminOpen] = useState(false);
-            const [showPasscodeModal, setShowPasscodeModal] = useState(false);
-            const [enteredPasscode, setEnteredPasscode] = useState('');
-            const [passcodeError, setPasscodeError] = useState('');
+            const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+            const [enteredId, setEnteredId] = useState('');
+            const [enteredPassword, setEnteredPassword] = useState('');
+            const [loginError, setLoginError] = useState('');
             const [showSuccessToast, setShowSuccessToast] = useState(false);
+            const [toastMessage, setToastMessage] = useState('Website published and updated successfully!');
             const [firebaseConnected, setFirebaseConnected] = useState(false);
+            const [founderTapCount, setFounderTapCount] = useState(0);
 
-            // Access points for Firestore
+            // Cloud DB Connectors
             const dbRef = useRef(null);
             const docRef = useRef(null);
 
-            // --- Realtime Sync Engine ---
+            // --- Realtime Firestore Sync Engine ---
             useEffect(() => {
                 const initFirebase = async () => {
                     const FC = window.FirebaseConnector;
@@ -1112,35 +1122,51 @@
                         const db = FC.getFirestore(app);
                         dbRef.current = db;
 
-                        // Perform Authentication first
+                        // Secure Authentication Block (RULE 3)
+                        let user = null;
                         if (initialToken) {
-                            await FC.signInWithCustomToken(auth, initialToken);
+                            try {
+                                const authResult = await FC.signInWithCustomToken(auth, initialToken);
+                                user = authResult.user;
+                            } catch (err) {
+                                console.warn("Custom token failed, using anonymous...", err);
+                                const authResult = await FC.signInAnonymously(auth);
+                                user = authResult.user;
+                            }
                         } else {
-                            await FC.signInAnonymously(auth);
+                            const authResult = await FC.signInAnonymously(auth);
+                            user = authResult.user;
                         }
 
-                        // Establish direct link to isolating artifact configuration block
+                        if (!user) {
+                            console.error("Auth failed.");
+                            setLoading(false);
+                            return;
+                        }
+
+                        // Isolated configuration directory (RULE 1)
                         const configDocPath = FC.doc(db, 'artifacts', appId, 'public', 'data', 'config', 'sm-prime-live');
                         docRef.current = configDocPath;
 
-                        // Set up reactive, real-time subscriber (onSnapshot)
+                        // Live cloud sync channel
                         const unsubscribe = FC.onSnapshot(configDocPath, (docSnapshot) => {
                             if (docSnapshot.exists()) {
                                 const liveData = docSnapshot.data();
                                 setConfig(liveData);
                             } else {
-                                // First-time setup auto population: write fallback default payload
+                                // Default schema deployment
                                 FC.setDoc(configDocPath, INITIAL_DEFAULT_CONFIG);
                             }
                             setFirebaseConnected(true);
+                            setLoading(false);
                         }, (err) => {
-                            console.error("Live configuration sync error:", err);
+                            console.error("Cloud Database Sync Error:", err);
+                            setLoading(false);
                         });
 
                         return () => unsubscribe();
                     } catch (e) {
-                        console.error("Firebase auth initialization failed:", e);
-                    } finally {
+                        console.error("Firebase config missing or blocked:", e);
                         setLoading(false);
                     }
                 };
@@ -1148,7 +1174,7 @@
                 initFirebase();
             }, []);
 
-            // --- Lenis Smooth scroll dynamic handler ---
+            // --- Kinetic Smooth Scroll System ---
             useEffect(() => {
                 const lenis = new Lenis({
                     duration: 1.2,
@@ -1185,36 +1211,48 @@
                 }
             };
 
-            const handlePasscodeSubmit = (e) => {
+            const handleCredentialsSubmit = (e) => {
                 e.preventDefault();
-                // Core passcode logic: 8696 (Last four digits of Ashish Yadav's direct phone number)
-                if (enteredPasscode === '8696') {
-                    setShowPasscodeModal(false);
+                // Secure Admin Credentials Validation (ashish / 86969)
+                if (enteredId.trim().toLowerCase() === 'ashish' && enteredPassword === '86969') {
+                    setShowCredentialsModal(false);
                     setIsAdminOpen(true);
-                    setEnteredPasscode('');
-                    setPasscodeError('');
+                    setEnteredId('');
+                    setEnteredPassword('');
+                    setLoginError('');
                 } else {
-                    setPasscodeError('Invalid Code. Authorization denied.');
+                    setLoginError('Invalid Username or Password. Access Denied.');
                 }
             };
 
             const handlePublishConfigChanges = async (newConfig) => {
                 if (docRef.current && window.FirebaseConnector) {
                     try {
-                        await window.FirebaseConnector.setDoc(docRef.current, newConfig);
+                        const FC = window.FirebaseConnector;
+                        const auth = FC.getAuth();
+                        if (!auth.currentUser) {
+                            console.error("Unauthorized operation.");
+                            return;
+                        }
+
+                        // Save directly and persistently to our cloud database (RULE 1)
+                        await FC.setDoc(docRef.current, newConfig);
                         setConfig(newConfig);
                         setIsAdminOpen(false);
                         
-                        // Fire toast success alert
+                        setToastMessage("Website published and updated successfully on live servers!");
                         setShowSuccessToast(true);
                         setTimeout(() => setShowSuccessToast(false), 4000);
                     } catch (err) {
-                        console.error("Failed to commit config data payload to Firestore:", err);
+                        console.error("Failed to sync setup with database:", err);
+                        setToastMessage("Sync Error: Cloud write failed.");
+                        setShowSuccessToast(true);
+                        setTimeout(() => setShowSuccessToast(false), 4000);
                     }
                 } else {
-                    // Failback local memory simulation state
                     setConfig(newConfig);
                     setIsAdminOpen(false);
+                    setToastMessage("Updated successfully (Offline Preview Mode)!");
                     setShowSuccessToast(true);
                     setTimeout(() => setShowSuccessToast(false), 4000);
                 }
@@ -1226,6 +1264,7 @@
                         await window.FirebaseConnector.setDoc(docRef.current, INITIAL_DEFAULT_CONFIG);
                         setConfig(INITIAL_DEFAULT_CONFIG);
                         setIsAdminOpen(false);
+                        setToastMessage("Factory layout restored on live servers successfully!");
                         setShowSuccessToast(true);
                         setTimeout(() => setShowSuccessToast(false), 4000);
                     } catch (err) {
@@ -1235,6 +1274,25 @@
                     setConfig(INITIAL_DEFAULT_CONFIG);
                     setIsAdminOpen(false);
                 }
+            };
+
+            // Secret Door: Opening Admin login directly on 7 Portrait Taps
+            const handleFounderPhotoClick = () => {
+                setFounderTapCount(prev => {
+                    const nextCount = prev + 1;
+                    if (nextCount === 7) {
+                        setShowCredentialsModal(true);
+                        setToastMessage("Secret Gate Found! Access Verification Required.");
+                        setShowSuccessToast(true);
+                        setTimeout(() => setShowSuccessToast(false), 4000);
+                        return 0;
+                    }
+                    
+                    setToastMessage(`Secret Door: Tap ${7 - nextCount} more times...`);
+                    setShowSuccessToast(true);
+                    setTimeout(() => setShowSuccessToast(false), 1200);
+                    return nextCount;
+                });
             };
 
             return (
@@ -1248,51 +1306,60 @@
                         <Hero data={config.hero} />
                         <Marquee />
                         <Vision data={config.vision} />
-                        <Founder data={config.founder} />
+                        <Founder data={config.founder} onPhotoClick={handleFounderPhotoClick} />
                         <Amenities items={config.amenities} />
                         <Portfolio items={config.projects} contactData={config.contact} />
                     </main>
 
                     <Footer data={config.contact} />
 
-                    {/* --- Admin Engine Dynamic Activation Lock --- */}
+                    {/* Interactive floating lock key */}
                     <button 
-                        onClick={() => setShowPasscodeModal(true)} 
+                        onClick={() => setShowCredentialsModal(true)} 
                         className="fixed bottom-6 right-6 z-[90] w-12 h-12 bg-prime-pearl border border-prime-ink/10 rounded-full flex items-center justify-center hover-trigger shadow-lg hover:bg-prime-ink hover:text-prime-pearl transition-colors duration-300 group"
-                        title="Open Curation Panel"
+                        title="Secure Admin Access"
                     >
                         <svg className="w-5 h-5 fill-current transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
                             <path d="M12 2C8.69 2 6 4.69 6 8v4c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-6c0-1.1-.9-2-2-2V8c0-3.31-2.69-6-6-6zm-4 6c0-2.21 1.79-4 4-4s4 1.79 4 4v4H8V8zm8 12H8v-6h8v6zm-4-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                         </svg>
                     </button>
 
-                    {/* Passcode Modal Overlay Gate */}
-                    {showPasscodeModal && (
+                    {/* Secure Admin Credentials Login Modal */}
+                    {showCredentialsModal && (
                         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 glass-modal animate-[fadeIn_0.3s_forwards]">
                             <style>{`@keyframes fadeIn { to { opacity: 1; } }`}</style>
-                            <form onSubmit={handlePasscodeSubmit} className="bg-prime-pearl border border-prime-ink/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center">
-                                <span className="text-prime-gold text-[10px] tracking-[0.3em] font-semibold uppercase mb-2">Secure Access Gate</span>
-                                <h3 className="font-serif text-2xl text-prime-ink mb-6 text-center">Open Live Curation</h3>
+                            <form onSubmit={handleCredentialsSubmit} className="bg-prime-pearl border border-prime-ink/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center">
+                                <span className="text-prime-gold text-[10px] tracking-[0.3em] font-semibold uppercase mb-2">Secure Authentication Gate</span>
+                                <h3 className="font-serif text-2xl text-prime-ink mb-6 text-center">Admin Access</h3>
                                 
-                                <p className="text-[10px] text-center text-prime-muted uppercase tracking-wider mb-6 max-w-xs">
-                                    Enter passcode (Hint: 8696)
-                                </p>
+                                <div className="w-full space-y-4 mb-4">
+                                    <div>
+                                        <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">ID</label>
+                                        <input 
+                                            type="text"
+                                            value={enteredId}
+                                            onChange={(e) => setEnteredId(e.target.value)}
+                                            placeholder="Enter Admin ID"
+                                            className="w-full text-xs bg-transparent border-b border-prime-ink/20 pb-2 focus:outline-none focus:border-prime-gold transition-colors text-prime-ink font-mono"
+                                            required
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Password</label>
+                                        <input 
+                                            type="password"
+                                            value={enteredPassword}
+                                            onChange={(e) => setEnteredPassword(e.target.value)}
+                                            placeholder="•••••"
+                                            className="w-full text-xs bg-transparent border-b border-prime-ink/20 pb-2 focus:outline-none focus:border-prime-gold transition-colors text-prime-ink tracking-widest font-mono"
+                                            required
+                                        />
+                                    </div>
+                                </div>
 
-                                <input 
-                                    type="password"
-                                    maxLength={4}
-                                    value={enteredPasscode}
-                                    onChange={(e) => {
-                                        setEnteredPasscode(e.target.value.replace(/\D/g, ''));
-                                        setPasscodeError('');
-                                    }}
-                                    placeholder="••••"
-                                    className="w-28 tracking-[1em] text-center text-xl font-bold bg-transparent border-b-2 border-prime-ink/20 pb-2 focus:outline-none focus:border-prime-gold transition-colors mb-4 placeholder-prime-ink/20"
-                                    autoFocus
-                                />
-
-                                {passcodeError && (
-                                    <p className="text-red-500 text-[9px] tracking-wide uppercase font-semibold mb-4 text-center">{passcodeError}</p>
+                                {loginError && (
+                                    <p className="text-red-500 text-[9px] tracking-wide uppercase font-semibold mb-4 text-center">{loginError}</p>
                                 )}
 
                                 <div className="flex gap-3 w-full mt-4">
@@ -1304,7 +1371,7 @@
                                     </button>
                                     <button 
                                         type="button"
-                                        onClick={() => { setShowPasscodeModal(false); setEnteredPasscode(''); setPasscodeError(''); }}
+                                        onClick={() => { setShowCredentialsModal(false); setEnteredId(''); setEnteredPassword(''); setLoginError(''); }}
                                         className="px-5 py-3 border border-prime-ink/10 text-prime-ink text-[10px] font-bold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors rounded-lg hover-trigger"
                                     >
                                         Cancel
@@ -1314,30 +1381,31 @@
                         </div>
                     )}
 
-                    {/* Live Curation Editing Panel Drawer */}
+                    {/* Live Curation Editing Panel */}
                     {isAdminOpen && (
                         <AdminPanel 
                             currentConfig={config} 
                             onSaveConfig={handlePublishConfigChanges} 
                             onClose={() => setIsAdminOpen(false)} 
+                            isDatabaseConnected={firebaseConnected}
                         />
                     )}
 
-                    {/* System Action Success Toast Alert */}
+                    {/* System Action Toasts */}
                     {showSuccessToast && (
                         <div className="fixed bottom-6 left-6 z-[130] bg-prime-ink text-prime-pearl border border-prime-gold/30 rounded-xl px-6 py-4 flex flex-col gap-1 shadow-2xl animate-[slideUp_0.4s_ease-out]">
                             <style>{`@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
-                            <span className="text-[9px] font-semibold tracking-widest uppercase text-prime-gold">Dynamic Sync Activated</span>
-                            <p className="text-[11px] font-medium tracking-wider">Website published and updated successfully on live servers!</p>
+                            <span className="text-[9px] font-semibold tracking-widest uppercase text-prime-gold">System Notification</span>
+                            <p className="text-[11px] font-medium tracking-wider">{toastMessage}</p>
                         </div>
                     )}
 
-                    {/* Developer Master Reset Lock */}
+                    {/* Master Reset Button */}
                     {isAdminOpen && (
                         <button 
                             onClick={handleRestoreOriginalDefaults}
                             className="fixed bottom-6 left-6 z-[140] bg-red-600 hover:bg-red-800 text-white text-[9px] font-bold tracking-widest uppercase px-4 py-2.5 rounded-lg shadow-2xl hover-trigger transition-all"
-                            title="Reset all content back to factory design configuration layout templates"
+                            title="Reset layout back to curated default templates"
                         >
                             Reset Factory Layout
                         </button>
