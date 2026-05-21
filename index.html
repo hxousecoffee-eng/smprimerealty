@@ -10,12 +10,12 @@
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX -->
+    <!-- Babel for JSX Compilation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- GSAP & ScrollTrigger -->
+    <!-- GSAP & ScrollTrigger for premium animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <!-- Lenis for buttery smooth scrolling -->
+    <!-- Lenis for smooth kinetic scrolling -->
     <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
 
     <script>
@@ -24,11 +24,11 @@
                 extend: {
                     colors: {
                         prime: {
-                            pearl: '#F8F8F5',    // Lighter, cleaner warm white
-                            surface: '#EFEFEA',  // Contrast section background
-                            ink: '#111111',      // Deepest charcoal
-                            gold: '#B39369',     // Refined champagne/bronze
-                            muted: '#8A8A8A'     // Elegant gray
+                            pearl: '#F8F8F5',    // Minimalist alabaster base
+                            surface: '#EFEFEA',  // Textured cool neutral
+                            ink: '#111111',      // Deep luxurious slate
+                            gold: '#B39369',     // Brushed champagne bronze
+                            muted: '#8A8A8A'     // Balanced muted slate
                         }
                     },
                     fontFamily: {
@@ -42,8 +42,9 @@
             }
         }
     </script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
         
         body {
             background-color: #F8F8F5;
@@ -55,23 +56,23 @@
             cursor: none;
         }
 
-        /* Subtle Noise Overlay for premium print feel */
+        /* Subtle Noise Overlay for editorial look */
         .noise-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none;
             z-index: 9999;
-            opacity: 0.03;
+            opacity: 0.025;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Custom Scrollbar */
+        /* Custom Modern Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #F8F8F5; }
-        ::-webkit-scrollbar-thumb { background: #EFEFEA; }
+        ::-webkit-scrollbar-thumb { background: #EFEFEA; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #B39369; }
 
-        /* Custom Cursor Elements */
+        /* Custom Trail Cursor Elements */
         .cursor-dot {
             width: 6px; height: 6px;
             background-color: #111111;
@@ -96,8 +97,8 @@
         body:hover .cursor-outline.hovered {
             width: 70px; height: 70px;
             border-color: #B39369;
-            background-color: rgba(179, 147, 105, 0.05);
-            backdrop-filter: blur(2px);
+            background-color: rgba(179, 147, 105, 0.04);
+            backdrop-filter: blur(1px);
         }
 
         @media (max-width: 768px) {
@@ -105,36 +106,132 @@
             .cursor-dot, .cursor-outline { display: none; }
         }
 
-        /* Utility Classes for Animations */
-        .text-reveal-mask { clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); overflow: hidden; }
-        .text-reveal-inner { transform: translateY(110%); }
-        
-        .img-parallax-container { overflow: hidden; position: relative; }
-        .img-parallax { height: 120%; width: 100%; object-fit: cover; transform-origin: center; }
-
+        /* Smooth marquee effect */
         .marquee-container { display: flex; overflow: hidden; white-space: nowrap; }
         .marquee-content { display: flex; animation: marquee 25s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        .glass-modal { background: rgba(248, 248, 245, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .glass-modal { background: rgba(248, 248, 245, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .glass-panel { background: rgba(239, 239, 234, 0.9); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
         
-        /* Smooth scrolling utility */
         html.lenis { height: auto; }
         .lenis.lenis-smooth { scroll-behavior: auto; }
         .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
         .lenis.lenis-stopped { overflow: hidden; }
-        .lenis.lenis-scrolling iframe { pointer-events: none; }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <div class="noise-overlay"></div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global DB connector hook to share dynamic configurations inside React scope safely
+        window.FirebaseConnector = {
+            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, getDoc, setDoc, onSnapshot
+        };
+    </script>
+
     <script type="text/babel">
         const { useState, useEffect, useLayoutEffect, useRef } = React;
         gsap.registerPlugin(ScrollTrigger);
 
-        // --- Custom Cursor Component ---
+        // --- Core Static Layout Fallbacks (Used if Firestore database is empty) ---
+        const INITIAL_DEFAULT_CONFIG = {
+            hero: {
+                titleLine1: "Curated",
+                titleLine2: "Spaces.",
+                subtitle: "Jaipur's most exclusive ready-to-move premium infrastructure.",
+                bgImage: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=2000"
+            },
+            vision: {
+                tagline: "The Vision",
+                headline: "Time is your most expensive asset. Kyu waste karna mahino interior design aur contractor ke delays mein?",
+                description: "Plug & Play. Elite spaces, designed for peak performance. You bring the vision, we provide the headquarters. Experience architectural grandeur without the friction of construction delays."
+            },
+            founder: {
+                tagline: "Meet the Founder",
+                name: "Ashish Yadav",
+                title: "Lead Curator & Visionary",
+                quote: "Your environment dictates your execution. We didn't just want to build offices; we wanted to engineer elite sanctuaries where Jaipur's most ambitious minds could accelerate without friction.",
+                bioParagraph1: "Recognizing a massive gap in the luxury commercial and residential market, Ashish pioneered the \"Plug & Play Empire\" concept in Jaipur. His vision eliminates the chaotic months spent dealing with contractors, interior designers, and setup delays.",
+                bioParagraph2: "Today, SM Prime Realty stands as the gold benchmark for premium, zero-delay real estate inside Jaipur.",
+                image: "https://rtrlavnozuljuajhwamz.supabase.co/storage/v1/object/public/photoes/Gemini_Generated_Image_ue7nh5ue7nh5ue7n.png"
+            },
+            amenities: [
+                { title: "Zero Setup Delay", desc: "Walk in, plug in, and start scaling. Fully furnished with ergonomic Herman Miller seating and robust high-speed infrastructure.", img: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=1600" },
+                { title: "Architectural Grandeur", desc: "Designed by top-tier interior architects utilizing natural light, premium acoustics, and Vastu-compliant layouts for maximum productivity.", img: "https://images.unsplash.com/photo-1556800623-2895ab260a99?auto=format&fit=crop&q=80&w=1600" },
+                { title: "Enterprise Security", desc: "Biometric access, 24/7 surveillance, and enterprise-grade network security protocols pre-installed to protect your assets.", img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1600" },
+                { title: "Curated Environment", desc: "From premium coffee bars to dedicated wellness zones, every square foot is optimized for elite corporate culture.", img: "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=1600" }
+            ],
+            projects: [
+                { 
+                    id: "project-1", 
+                    title: "The Paragon Hub", 
+                    type: "Commercial", 
+                    size: "18,500 Sq Ft", 
+                    location: "Vaishali Nagar", 
+                    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "An avant-garde corporate enclave engineered for high-performance scale. Features curated custom-built lounges, bespoke workspaces, and top-tier amenities that allow fast-scaling brands to perform at peak capacity from day one.",
+                    reelUrl: "https://www.instagram.com/reel/DW3Ow31kznq/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: "project-2", 
+                    title: "The Prestige Suites", 
+                    type: "Residential", 
+                    size: "5,800 Sq Ft", 
+                    location: "C-Scheme", 
+                    img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "A breathtaking residential sanctuary where architectural heritage meets absolute modern refinement. Designed with premium high-end automation, Italian marbles, custom architectural glass panels, and absolute acoustic comfort.",
+                    reelUrl: "https://www.instagram.com/reel/DWq8E8ik-Ud/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: "project-3", 
+                    title: "Aetherial Workspace", 
+                    type: "Commercial", 
+                    size: "12,000 Sq Ft", 
+                    location: "DCM, Vaishali Nagar", 
+                    img: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "An ultra-premium corporate headquarter concept featuring private executive glass offices, modern conference rooms, custom library lounges, and built-in premium wellness hubs designed to inspire teams to build empires.",
+                    reelUrl: "https://www.instagram.com/reel/DWoasYJk-sA/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: "project-4", 
+                    title: "The Zenith Office Suite", 
+                    type: "Commercial", 
+                    size: "9,200 Sq Ft", 
+                    location: "Malviya Nagar", 
+                    img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "Crafted exclusively for ambitious corporate operations, this fully-integrated workplace features a state-of-the-art security suite, custom layout modules, smart thermal controls, and panoramic vistas of Jaipur's prime skyline.",
+                    reelUrl: "https://www.instagram.com/reel/DWi4H8bE2cX/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: "project-5", 
+                    title: "Monarch Penthouses", 
+                    type: "Residential", 
+                    size: "6,550 Sq Ft", 
+                    location: "Bapu Nagar", 
+                    img: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "An ultra-luxe residence with high ceilings, wrapping floor-to-ceiling glass windows, a private sunset terrace lounge, and carefully chosen custom art accents that cultivate an environment of absolute sophistication and tranquility.",
+                    reelUrl: "https://www.instagram.com/reel/DWgUeX0E9G0/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                }
+            ],
+            contact: {
+                address1: "SM Tower 3 and 6",
+                address2: "Baba market DCM",
+                address3: "Vaishali Nagar, Jaipur",
+                addressState: "Rajasthan, India",
+                instagram: "@smprimerealty",
+                instagramLink: "https://instagram.com/smprimerealty",
+                phone: "+918696996609",
+                phoneFormatted: "+91 8696996609"
+            }
+        };
+
+        // --- Custom Interactive Cursor Component ---
         const CustomCursor = () => {
             const dotRef = useRef(null);
             const outlineRef = useRef(null);
@@ -142,10 +239,10 @@
             useEffect(() => {
                 const moveCursor = (e) => {
                     gsap.to(dotRef.current, { x: e.clientX, y: e.clientY, duration: 0, ease: "none" });
-                    gsap.to(outlineRef.current, { x: e.clientX, y: e.clientY, duration: 0.2, ease: "power2.out" });
+                    gsap.to(outlineRef.current, { x: e.clientX, y: e.clientY, duration: 0.15, ease: "power2.out" });
                 };
                 const handleMouseOver = (e) => {
-                    if (e.target.closest('button, a, .hover-trigger')) {
+                    if (e.target.closest('button, a, input, select, textarea, .hover-trigger')) {
                         outlineRef.current.classList.add('hovered');
                     } else {
                         outlineRef.current.classList.remove('hovered');
@@ -167,7 +264,7 @@
             );
         };
 
-        // --- Preloader Component ---
+        // --- Cinematic Custom Preloader ---
         const Preloader = ({ setLoading }) => {
             const containerRef = useRef(null);
             const textRef = useRef(null);
@@ -185,16 +282,16 @@
                         }
                     });
 
-                    tl.to(textRef.current, { y: 0, duration: 1.5, ease: "power4.out", delay: 0.3 })
-                      .to(textRef.current, { opacity: 0, duration: 0.5, delay: 0.8 });
+                    tl.fromTo(textRef.current, { y: 100, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2, ease: "power4.out", delay: 0.2 })
+                      .to(textRef.current, { opacity: 0, duration: 0.5, delay: 0.6 });
                 });
                 return () => ctx.revert();
             }, []);
 
             return (
                 <div ref={containerRef} className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-prime-pearl">
-                    <div className="text-reveal-mask">
-                        <h1 ref={textRef} className="text-reveal-inner font-serif text-3xl md:text-5xl text-prime-ink tracking-[0.2em] uppercase text-center flex flex-col items-center gap-2">
+                    <div className="overflow-hidden">
+                        <h1 ref={textRef} className="font-serif text-3xl md:text-5xl text-prime-ink tracking-[0.2em] uppercase text-center flex flex-col items-center gap-2">
                             <span>SM Prime</span>
                             <span className="italic text-prime-gold">Realty</span>
                         </h1>
@@ -203,26 +300,19 @@
             );
         };
 
-        // --- Navbar Component ---
-        const Navbar = () => {
-            const handleScroll = (id) => {
-                const element = document.getElementById(id);
-                if(element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            };
-
+        // --- Elegant Floating Navigation Bar ---
+        const Navbar = ({ onSectionScroll }) => {
             return (
                 <nav className="fixed w-full top-0 z-50 px-6 py-6 md:px-12 flex justify-between items-center bg-gradient-to-b from-prime-pearl/95 to-transparent backdrop-blur-sm">
-                    <div onClick={() => handleScroll('hero')} className="font-serif text-xl md:text-2xl tracking-[0.15em] uppercase text-prime-ink cursor-pointer hover-trigger flex flex-col">
+                    <div onClick={() => onSectionScroll('hero')} className="font-serif text-xl md:text-2xl tracking-[0.15em] uppercase text-prime-ink cursor-pointer hover-trigger flex flex-col">
                         <span>SM Prime</span>
-                        <span className="text-[0.5em] font-sans tracking-[0.3em] text-prime-muted">Realty</span>
+                        <span className="text-[0.5em] font-sans tracking-[0.3em] text-prime-muted uppercase">Realty</span>
                     </div>
-                    <div className="hidden md:flex space-x-10 text-[10px] font-medium tracking-[0.2em] uppercase text-prime-ink">
+                    <div className="hidden md:flex space-x-10 text-[10px] font-semibold tracking-[0.2em] uppercase text-prime-ink">
                         {['Vision', 'Founder', 'Amenities', 'Portfolio', 'Connect'].map((tab) => (
                             <button 
                                 key={tab} 
-                                onClick={() => handleScroll(tab.toLowerCase())} 
+                                onClick={() => onSectionScroll(tab.toLowerCase())} 
                                 className="hover:text-prime-gold transition-colors hover-trigger relative group"
                             >
                                 {tab}
@@ -230,35 +320,35 @@
                             </button>
                         ))}
                     </div>
-                    {/* Mobile Menu Button - simplified for prototype */}
-                    <button onClick={() => handleScroll('connect')} className="md:hidden text-xs tracking-widest uppercase border-b border-prime-ink pb-1">Connect</button>
+                    <button onClick={() => onSectionScroll('connect')} className="md:hidden text-xs tracking-widest uppercase border-b border-prime-ink pb-1 font-semibold">Connect</button>
                 </nav>
             );
         };
 
-        // --- Hero Component ---
-        const Hero = () => {
+        // --- Modern Hero Section with slow zoom parallax ---
+        const Hero = ({ data }) => {
             const heroRef = useRef(null);
 
             useLayoutEffect(() => {
                 const ctx = gsap.context(() => {
-                    gsap.from('.hero-title span', {
+                    gsap.from('.hero-title-line', {
                         y: 100,
                         opacity: 0,
-                        duration: 1.5,
-                        stagger: 0.1,
+                        duration: 1.4,
+                        stagger: 0.15,
                         ease: 'power4.out',
-                        delay: 2.5 // wait for preloader
+                        delay: 1.8
                     });
                     gsap.from('.hero-sub', {
                         opacity: 0,
+                        y: 20,
                         duration: 1,
-                        delay: 3.2,
+                        delay: 2.4,
                         ease: 'power2.out'
                     });
                     gsap.to('.hero-bg', {
-                        scale: 1.1,
-                        duration: 20,
+                        scale: 1.12,
+                        duration: 22,
                         ease: 'none',
                         repeat: -1,
                         yoyo: true
@@ -269,66 +359,90 @@
 
             return (
                 <section id="hero" ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden bg-prime-pearl">
-                    {/* Background */}
                     <div className="absolute inset-0 z-0 overflow-hidden">
                         <img 
-                            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=2000" 
-                            alt="Luxury Architecture" 
-                            className="hero-bg w-full h-full object-cover opacity-50 mix-blend-multiply grayscale-[30%]"
+                            src={data?.bgImage || INITIAL_DEFAULT_CONFIG.hero.bgImage} 
+                            alt="Luxury Workspace Exterior" 
+                            className="hero-bg w-full h-full object-cover opacity-50 mix-blend-multiply grayscale-[20%]"
+                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=2000" }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-prime-pearl via-transparent to-prime-pearl/40"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-prime-pearl via-transparent to-prime-pearl/30"></div>
                     </div>
 
                     <div className="relative z-10 text-center px-6 mt-16 flex flex-col items-center">
-                        <h1 className="hero-title font-serif text-5xl md:text-8xl lg:text-9xl text-prime-ink leading-[0.9] tracking-tight flex flex-col md:flex-row gap-2 md:gap-6 overflow-hidden">
-                            <span className="block transform translate-y-0">Curated</span>
-                            <span className="block italic text-prime-gold transform translate-y-0">Spaces.</span>
+                        <h1 className="font-serif text-5xl md:text-8xl lg:text-9xl text-prime-ink leading-[0.95] tracking-tight flex flex-col md:flex-row gap-2 md:gap-6 overflow-hidden pb-4">
+                            <span className="hero-title-line block transform">{data?.titleLine1}</span>
+                            <span className="hero-title-line block italic text-prime-gold transform">{data?.titleLine2}</span>
                         </h1>
-                        <p className="hero-sub mt-8 text-[10px] md:text-xs font-medium tracking-[0.3em] text-prime-ink/80 uppercase max-w-md mx-auto">
-                            Jaipur's most exclusive ready-to-move premium infrastructure.
+                        <p className="hero-sub mt-6 text-[11px] md:text-xs font-semibold tracking-[0.3em] text-prime-ink/80 uppercase max-w-lg mx-auto leading-relaxed">
+                            {data?.subtitle}
                         </p>
                     </div>
                 </section>
             );
         };
 
-        // --- Vision Component ---
-        const Vision = () => {
+        // --- Brand Authority Infinite Location Marquee ---
+        const Marquee = () => {
+            const locations = ["C-Scheme", "Vaishali Nagar", "Malviya Nagar", "Jagatpura", "Bapu Nagar", "DCM"];
+            return (
+                <div className="py-8 border-y border-prime-ink/10 bg-prime-surface overflow-hidden select-none">
+                    <div className="marquee-container">
+                        <div className="marquee-content items-center">
+                            {[...Array(4)].map((_, index) => (
+                                <div key={index} className="flex items-center">
+                                    {locations.map((loc, locIndex) => (
+                                        <React.Fragment key={`${index}-${locIndex}`}>
+                                            <span className="text-2xl md:text-3xl font-serif italic mx-8 text-prime-ink/80 whitespace-nowrap">{loc}</span>
+                                            <span className="text-prime-gold text-lg mx-2">✦</span>
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Strategic Mission and Vision Section ---
+        const Vision = ({ data }) => {
             const sectionRef = useRef(null);
 
             useLayoutEffect(() => {
                 const ctx = gsap.context(() => {
-                    gsap.from('.vision-text', {
-                        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' },
-                        y: 40, opacity: 0, duration: 1, stagger: 0.15, ease: 'power3.out'
+                    gsap.from('.vision-reveal', {
+                        scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
+                        y: 35, opacity: 0, duration: 1.1, stagger: 0.15, ease: 'power3.out'
                     });
                 }, sectionRef);
                 return () => ctx.revert();
             }, []);
 
             return (
-                <section id="vision" ref={sectionRef} className="py-24 md:py-40 px-6 md:px-12 bg-prime-pearl relative z-10">
+                <section id="vision" ref={sectionRef} className="py-24 md:py-36 px-6 md:px-12 bg-prime-pearl relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h3 className="vision-text text-prime-gold text-xs tracking-[0.3em] uppercase mb-8">The Vision</h3>
-                        <h2 className="vision-text font-serif text-3xl md:text-5xl text-prime-ink leading-tight mb-10">
-                            Time is your most expensive asset. <br className="hidden md:block"/>
-                            <span className="italic text-prime-ink/70">Kyu waste karna mahino interior design aur contractor ke delays mein?</span>
+                        <h3 className="vision-reveal text-prime-gold text-[10px] tracking-[0.3em] font-semibold uppercase mb-6">
+                            {data?.tagline || INITIAL_DEFAULT_CONFIG.vision.tagline}
+                        </h3>
+                        <h2 className="vision-reveal font-serif text-3xl md:text-5xl text-prime-ink leading-snug mb-10">
+                            {data?.headline || INITIAL_DEFAULT_CONFIG.vision.headline}
                         </h2>
-                        <p className="vision-text text-prime-ink/70 font-light leading-relaxed text-sm md:text-base max-w-2xl mx-auto">
-                            Plug & Play. Elite spaces, designed for peak performance. You bring the vision, we provide the headquarters. Experience architectural grandeur without the friction of construction.
+                        <p className="vision-reveal text-prime-ink/70 font-light leading-relaxed text-sm md:text-base max-w-2xl mx-auto">
+                            {data?.description || INITIAL_DEFAULT_CONFIG.vision.description}
                         </p>
                     </div>
                 </section>
             );
         };
 
-        // --- Founder Component ---
-        const Founder = () => {
+        // --- Curator Profile: Meet the Founder ---
+        const Founder = ({ data }) => {
             const sectionRef = useRef(null);
             
             useLayoutEffect(() => {
                 const ctx = gsap.context(() => {
-                    gsap.from('.founder-anim', {
+                    gsap.from('.founder-reveal', {
                         y: 40, opacity: 0, duration: 1, stagger: 0.15, ease: "power3.out",
                         scrollTrigger: { trigger: sectionRef.current, start: "top 75%" }
                     });
@@ -340,26 +454,36 @@
                 <section id="founder" ref={sectionRef} className="py-24 md:py-32 px-6 md:px-12 bg-prime-surface border-t border-prime-ink/5">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row-reverse gap-16 md:gap-24 items-center">
                         <div className="w-full md:w-1/2">
-                            <h3 className="founder-anim text-prime-gold text-xs tracking-[0.3em] uppercase mb-4">Meet the Founder</h3>
-                            <h2 className="founder-anim font-serif text-4xl md:text-5xl text-prime-ink leading-tight mb-2">Ashish Yadav</h2>
-                            <p className="founder-anim text-xs uppercase tracking-widest text-prime-muted mb-8">Lead Curator & Visionary</p>
+                            <h3 className="founder-reveal text-prime-gold text-[10px] tracking-[0.3em] font-semibold uppercase mb-4">
+                                {data?.tagline}
+                            </h3>
+                            <h2 className="founder-reveal font-serif text-4xl md:text-5xl text-prime-ink leading-tight mb-2">
+                                {data?.name}
+                            </h2>
+                            <p className="founder-reveal text-xs uppercase tracking-widest text-prime-muted font-medium mb-8">
+                                {data?.title}
+                            </p>
                             
-                            <blockquote className="founder-anim text-prime-ink/80 text-lg md:text-xl font-serif italic leading-relaxed mb-8 border-l-2 border-prime-gold pl-6">
-                                "Your environment dictates your execution. We didn't just want to build offices; we wanted to engineer elite sanctuaries where Jaipur's most ambitious minds could accelerate without friction."
+                            <blockquote className="founder-reveal text-prime-ink/80 text-lg md:text-xl font-serif italic leading-relaxed mb-8 border-l-2 border-prime-gold pl-6">
+                                "{data?.quote}"
                             </blockquote>
                             
-                            <p className="founder-anim text-prime-ink/70 leading-relaxed font-light mb-6 text-sm">
-                                Recognizing a massive gap in the luxury commercial and residential market, Ashish pioneered the "Plug & Play Empire" concept in Jaipur. His vision eliminates the chaotic months spent dealing with contractors, interior designers, and setup delays.
+                            <p className="founder-reveal text-prime-ink/70 leading-relaxed font-light mb-6 text-sm">
+                                {data?.bioParagraph1}
                             </p>
-                            <p className="founder-anim text-prime-ink/70 leading-relaxed font-light text-sm">
-                                Today, SM Prime Realty stands as the benchmark for premium, zero-delay real estate.
+                            <p className="founder-reveal text-prime-ink/70 leading-relaxed font-light text-sm">
+                                {data?.bioParagraph2}
                             </p>
                         </div>
-                        <div className="w-full md:w-1/2 founder-anim relative">
+                        <div className="w-full md:w-1/2 founder-reveal relative">
                             <div className="aspect-[3/4] rounded-xl overflow-hidden bg-prime-pearl relative shadow-sm">
-                                {/* Customized Founder Portrait */}
-                                <img src="https://rtrlavnozuljuajhwamz.supabase.co/storage/v1/object/public/photoes/Gemini_Generated_Image_ue7nh5ue7nh5ue7n.png" alt="Ashish Yadav - Founder" className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-prime-ink/30 to-transparent"></div>
+                                <img 
+                                    src={data?.image} 
+                                    alt="Ashish Yadav - Founder of SM Prime Realty" 
+                                    className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700" 
+                                    onError={(e) => { e.target.src = INITIAL_DEFAULT_CONFIG.founder.image }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-prime-ink/20 to-transparent"></div>
                             </div>
                         </div>
                     </div>
@@ -367,57 +491,29 @@
             );
         };
 
-        // --- Marquee Component ---
-        const Marquee = () => {
-            const words = ["C-Scheme", "Vaishali Nagar", "Malviya Nagar", "Jagatpura", "Bapu Nagar", "DCM"];
-            return (
-                <div className="py-8 border-y border-prime-ink/10 bg-prime-surface overflow-hidden">
-                    <div className="marquee-container">
-                        <div className="marquee-content items-center">
-                            {[...Array(4)].map((_, i) => (
-                                <div key={i} className="flex items-center">
-                                    {words.map((word, j) => (
-                                        <React.Fragment key={`${i}-${j}`}>
-                                            <span className="text-2xl md:text-4xl font-serif italic mx-6 text-prime-ink/80 whitespace-nowrap">{word}</span>
-                                            <span className="text-prime-gold text-xl mx-2">✦</span>
-                                        </React.Fragment>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- Amenities (Services) Component - Sticky Layout ---
-        const Amenities = () => {
+        // --- Interactive Premium Amenities Segment (Accordion Panel) ---
+        const Amenities = ({ items }) => {
             const [activeImg, setActiveImg] = useState(0);
-            const amenities = [
-                { title: "Zero Setup Delay", desc: "Walk in, plug in, and start scaling. Fully furnished with ergonomic Herman Miller seating and robust high-speed infrastructure.", img: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=1600" },
-                { title: "Architectural Grandeur", desc: "Designed by top-tier interior architects utilizing natural light, premium acoustics, and Vastu-compliant layouts for maximum productivity.", img: "https://images.unsplash.com/photo-1556800623-2895ab260a99?auto=format&fit=crop&q=80&w=1600" },
-                { title: "Enterprise Security", desc: "Biometric access, 24/7 surveillance, and enterprise-grade network security protocols pre-installed to protect your assets.", img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1600" },
-                { title: "Curated Environment", desc: "From premium coffee bars to dedicated wellness zones, every square foot is optimized for elite corporate culture.", img: "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=1600" }
-            ];
+            const amenitiesList = items || INITIAL_DEFAULT_CONFIG.amenities;
 
             return (
-                <section id="amenities" className="py-24 md:py-40 px-6 md:px-12 bg-prime-pearl">
+                <section id="amenities" className="py-24 md:py-36 px-6 md:px-12 bg-prime-pearl">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
                         <div className="w-full md:w-1/2 md:sticky md:top-32 h-fit">
-                            <h3 className="text-prime-gold text-xs tracking-[0.3em] uppercase mb-6">The Standard</h3>
-                            <h2 className="font-serif text-4xl md:text-5xl text-prime-ink mb-12">Uncompromising <br/><span className="italic">Quality.</span></h2>
+                            <h3 className="text-prime-gold text-[10px] tracking-[0.3em] font-semibold uppercase mb-6">The Standard</h3>
+                            <h2 className="font-serif text-4xl md:text-5xl text-prime-ink mb-12">Uncompromising <br/><span className="italic text-prime-gold">Quality.</span></h2>
                             
-                            <div className="space-y-8">
-                                {amenities.map((item, idx) => (
+                            <div className="space-y-6">
+                                {amenitiesList.map((item, idx) => (
                                     <div 
                                         key={idx} 
-                                        className="border-t border-prime-ink/10 pt-8 cursor-pointer group hover-trigger"
+                                        className="border-t border-prime-ink/10 pt-6 cursor-pointer group hover-trigger"
                                         onMouseEnter={() => setActiveImg(idx)}
                                     >
-                                        <h3 className={`text-2xl font-serif transition-colors duration-300 ${activeImg === idx ? 'text-prime-gold italic' : 'text-prime-ink group-hover:text-prime-ink/70'}`}>
+                                        <h3 className={`text-xl font-serif transition-colors duration-300 ${activeImg === idx ? 'text-prime-gold italic' : 'text-prime-ink group-hover:text-prime-gold'}`}>
                                             {item.title}
                                         </h3>
-                                        <div className={`overflow-hidden transition-all duration-500 ease-expo ${activeImg === idx ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                        <div className={`overflow-hidden transition-all duration-500 ease-expo ${activeImg === idx ? 'max-h-40 mt-3 opacity-100' : 'max-h-0 opacity-0'}`}>
                                             <p className="text-prime-ink/70 text-sm leading-relaxed pr-8 font-light">{item.desc}</p>
                                         </div>
                                     </div>
@@ -425,13 +521,14 @@
                             </div>
                         </div>
                         
-                        <div className="w-full md:w-1/2 h-[50vh] md:h-[70vh] rounded-2xl overflow-hidden relative">
-                            {amenities.map((item, idx) => (
+                        <div className="w-full md:w-1/2 h-[50vh] md:h-[65vh] rounded-2xl overflow-hidden relative shadow-sm">
+                            {amenitiesList.map((item, idx) => (
                                 <img 
                                     key={idx}
                                     src={item.img} 
                                     alt={item.title}
                                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${activeImg === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
+                                    onError={(e) => { e.target.src = "https://placehold.co/800x600/EFEFEA/111111?text=" + encodeURIComponent(item.title) }}
                                 />
                             ))}
                         </div>
@@ -440,94 +537,42 @@
             );
         };
 
-        // --- Portfolio Component ---
-        const Portfolio = () => {
+        // --- Filterable Portfolio System with Instagram Video Tours ---
+        const Portfolio = ({ items, contactData }) => {
             const [filter, setFilter] = useState('All');
             const [selectedProject, setSelectedProject] = useState(null);
             const gridRef = useRef(null);
+            const projectList = items || INITIAL_DEFAULT_CONFIG.projects;
 
-            const projects = [
-                { 
-                    id: 1, 
-                    title: "The Paragon Hub", 
-                    type: "Commercial", 
-                    size: "18,500 Sq Ft", 
-                    location: "Vaishali Nagar", 
-                    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600", 
-                    desc: "An avant-garde corporate enclave engineered for high-performance scale. Features curated custom-built lounges, bespoke workspaces, and top-tier amenities that allow fast-scaling brands to perform at peak capacity from day one.",
-                    reelUrl: "https://www.instagram.com/reel/DW3Ow31kznq/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
-                },
-                { 
-                    id: 2, 
-                    title: "The Prestige Suites", 
-                    type: "Residential", 
-                    size: "5,800 Sq Ft", 
-                    location: "C-Scheme", 
-                    img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=1600", 
-                    desc: "A breathtaking residential sanctuary where architectural heritage meets absolute modern refinement. Designed with premium high-end automation, Italian marbles, custom architectural glass panels, and absolute acoustic comfort.",
-                    reelUrl: "https://www.instagram.com/reel/DWq8E8ik-Ud/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
-                },
-                { 
-                    id: 3, 
-                    title: "Aetherial Workspace", 
-                    type: "Commercial", 
-                    size: "12,000 Sq Ft", 
-                    location: "DCM, Vaishali Nagar", 
-                    img: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=1600", 
-                    desc: "An ultra-premium corporate headquarter concept featuring private executive glass offices, modern conference rooms, custom library lounges, and built-in premium wellness hubs designed to inspire teams to build empires.",
-                    reelUrl: "https://www.instagram.com/reel/DWoasYJk-sA/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
-                },
-                { 
-                    id: 4, 
-                    title: "The Zenith Office Suite", 
-                    type: "Commercial", 
-                    size: "9,200 Sq Ft", 
-                    location: "Malviya Nagar", 
-                    img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1600", 
-                    desc: "Crafted exclusively for ambitious corporate operations, this fully-integrated workplace features a state-of-the-art security suite, custom layout modules, smart thermal controls, and panoramic vistas of Jaipur's prime skyline.",
-                    reelUrl: "https://www.instagram.com/reel/DWi4H8bE2cX/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
-                },
-                { 
-                    id: 5, 
-                    title: "Monarch Penthouses", 
-                    type: "Residential", 
-                    size: "6,550 Sq Ft", 
-                    location: "Bapu Nagar", 
-                    img: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&q=80&w=1600", 
-                    desc: "An ultra-luxe residence with high ceilings, wrapping floor-to-ceiling glass windows, a private sunset terrace lounge, and carefully chosen custom art accents that cultivate an environment of absolute sophistication and tranquility.",
-                    reelUrl: "https://www.instagram.com/reel/DWgUeX0E9G0/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
-                }
-            ];
-
-            const filtered = filter === 'All' ? projects : projects.filter(p => p.type === filter);
+            const filtered = filter === 'All' ? projectList : projectList.filter(p => p.type === filter);
 
             useLayoutEffect(() => {
                 if(gridRef.current) {
                     gsap.fromTo(gridRef.current.children, 
                         { opacity: 0, y: 30 },
-                        { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" }
+                        { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }
                     );
                 }
-            }, [filter]);
+            }, [filter, projectList]);
 
             return (
-                <section id="portfolio" className="py-24 md:py-40 px-6 md:px-12 bg-prime-surface">
+                <section id="portfolio" className="py-24 md:py-36 px-6 md:px-12 bg-prime-surface">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                             <div>
-                                <h3 className="text-prime-gold text-xs tracking-[0.3em] uppercase mb-4">Curated Spaces</h3>
-                                <h2 className="font-serif text-5xl md:text-6xl text-prime-ink">Selected <br/><span className="italic text-prime-gold">Works.</span></h2>
+                                <h3 className="text-prime-gold text-[10px] tracking-[0.3em] font-semibold uppercase mb-4">Curated Spaces</h3>
+                                <h2 className="font-serif text-5xl md:text-6.5xl text-prime-ink">Selected <br/><span className="italic text-prime-gold">Works.</span></h2>
                             </div>
                             
-                            <div className="flex space-x-6 border-b border-prime-ink/20 pb-2">
+                            <div className="flex space-x-6 border-b border-prime-ink/10 pb-2">
                                 {['All', 'Commercial', 'Residential'].map(cat => (
                                     <button 
                                         key={cat}
                                         onClick={() => setFilter(cat)}
-                                        className={`uppercase text-[10px] md:text-xs tracking-widest hover-trigger pb-2 relative transition-colors ${filter === cat ? 'text-prime-ink font-medium' : 'text-prime-muted hover:text-prime-ink'}`}
+                                        className={`uppercase text-[10px] md:text-xs tracking-widest hover-trigger pb-2 relative transition-colors font-semibold ${filter === cat ? 'text-prime-ink' : 'text-prime-muted hover:text-prime-ink'}`}
                                     >
                                         {cat}
-                                        {filter === cat && <span className="absolute bottom-[-1px] left-0 w-full h-[1px] bg-prime-ink"></span>}
+                                        {filter === cat && <span className="absolute bottom-[-1px] left-0 w-full h-[1.5px] bg-prime-ink animate-pulse"></span>}
                                     </button>
                                 ))}
                             </div>
@@ -536,24 +581,25 @@
                         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
                             {filtered.map((project) => (
                                 <div key={project.id} className="group cursor-pointer hover-trigger" onClick={() => setSelectedProject(project)}>
-                                    <div className="img-parallax-container aspect-[4/3] rounded-xl mb-6 overflow-hidden bg-prime-pearl relative">
+                                    <div className="aspect-[4/3] rounded-xl mb-6 overflow-hidden bg-prime-pearl relative shadow-sm">
                                         <img 
                                             src={project.img} 
                                             alt={project.title} 
-                                            className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
+                                            className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.03]"
+                                            onError={(e) => { e.target.src = "https://placehold.co/800x600/EFEFEA/111111?text=" + encodeURIComponent(project.title) }}
                                         />
-                                        <div className="absolute top-4 right-4 bg-prime-pearl/90 backdrop-blur-sm px-3 py-1 rounded-full border border-prime-ink/5 flex items-center space-x-1">
+                                        <div className="absolute top-4 right-4 bg-prime-pearl/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-prime-ink/5 flex items-center space-x-1.5 shadow-sm">
                                             <span className="w-1.5 h-1.5 rounded-full bg-prime-gold animate-ping"></span>
-                                            <span className="text-[9px] uppercase tracking-wider font-semibold text-prime-ink">Cinematic Tour Available</span>
+                                            <span className="text-[8px] uppercase tracking-wider font-semibold text-prime-ink">Cinematic Tour Available</span>
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-start">
+                                    <div className="flex justify-between items-start px-1">
                                         <div>
-                                            <h3 className="font-serif text-3xl text-prime-ink mb-1 group-hover:text-prime-gold transition-colors">{project.title}</h3>
-                                            <p className="text-prime-muted text-xs uppercase tracking-wider">{project.type}</p>
+                                            <h3 className="font-serif text-2xl md:text-3xl text-prime-ink mb-1 group-hover:text-prime-gold transition-colors">{project.title}</h3>
+                                            <p className="text-prime-muted text-[10px] uppercase tracking-wider font-medium">{project.type}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-xs tracking-widest uppercase text-prime-ink">{project.location}</p>
+                                            <p className="text-xs tracking-widest uppercase font-semibold text-prime-ink">{project.location}</p>
                                             <p className="text-prime-gold text-sm mt-1 font-serif italic">{project.size}</p>
                                         </div>
                                     </div>
@@ -562,48 +608,58 @@
                         </div>
                     </div>
 
-                    {/* Quick View Modal */}
+                    {/* Quick View Dynamic Modal */}
                     {selectedProject && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 glass-modal opacity-0 animate-[fadeIn_0.3s_forwards]">
-                            <style>{`@keyframes fadeIn { to { opacity: 1; } }`}</style>
-                            <div className="bg-prime-pearl w-full max-w-5xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
-                                <button onClick={() => setSelectedProject(null)} className="absolute top-4 right-4 z-10 w-10 h-10 bg-prime-surface border border-prime-ink/10 text-prime-ink rounded-full flex items-center justify-center hover-trigger hover:bg-prime-ink hover:text-prime-pearl transition-colors">✕</button>
-                                <div className="w-full md:w-1/2 h-[35vh] md:h-[70vh] relative">
-                                    <img src={selectedProject.img} alt={selectedProject.title} className="w-full h-full object-cover" />
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 glass-modal transition-opacity duration-300">
+                            <div className="bg-prime-pearl w-full max-w-5xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative border border-prime-ink/5 max-h-[90vh] md:max-h-none overflow-y-auto md:overflow-visible">
+                                <button onClick={() => setSelectedProject(null)} className="absolute top-4 right-4 z-10 w-10 h-10 bg-prime-surface border border-prime-ink/10 text-prime-ink rounded-full flex items-center justify-center hover-trigger hover:bg-prime-ink hover:text-prime-pearl transition-colors shadow-sm">✕</button>
+                                <div className="w-full md:w-1/2 h-[30vh] md:h-[65vh] relative bg-prime-surface">
+                                    <img 
+                                        src={selectedProject.img} 
+                                        alt={selectedProject.title} 
+                                        className="w-full h-full object-cover" 
+                                        onError={(e) => { e.target.src = "https://placehold.co/800x600/EFEFEA/111111?text=" + encodeURIComponent(selectedProject.title) }}
+                                    />
                                     <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
                                         <a href={selectedProject.reelUrl} target="_blank" rel="noreferrer" className="w-16 h-16 rounded-full bg-prime-pearl/95 flex items-center justify-center shadow-lg hover:scale-110 transition-transform hover-trigger group">
                                             <span className="text-prime-gold text-xl pl-1 group-hover:scale-105 transition-transform">▶</span>
                                         </a>
                                     </div>
                                 </div>
-                                <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
-                                    <span className="text-prime-gold text-xs tracking-[0.2em] uppercase mb-4">{selectedProject.location}</span>
-                                    <h3 className="font-serif text-4xl md:text-5xl text-prime-ink mb-6">{selectedProject.title}</h3>
-                                    <p className="text-prime-ink/70 mb-8 leading-relaxed font-light text-sm md:text-base">{selectedProject.desc}</p>
+                                <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
+                                    <span className="text-prime-gold text-xs tracking-[0.2em] font-semibold uppercase mb-3">{selectedProject.location}</span>
+                                    <h3 className="font-serif text-3xl md:text-4.5xl text-prime-ink mb-4">{selectedProject.title}</h3>
+                                    <p className="text-prime-ink/70 mb-6 leading-relaxed font-light text-xs md:text-sm">{selectedProject.desc}</p>
                                     
-                                    <div className="grid grid-cols-2 gap-6 mb-10 border-t border-b border-prime-ink/10 py-6">
+                                    <div className="grid grid-cols-2 gap-4 mb-8 border-t border-b border-prime-ink/10 py-5">
                                         <div>
-                                            <span className="block text-prime-muted text-[10px] tracking-widest uppercase mb-1">Space Area</span>
-                                            <span className="text-prime-ink font-serif italic text-xl">{selectedProject.size}</span>
+                                            <span className="block text-prime-muted text-[8px] tracking-widest uppercase mb-1 font-semibold">Space Area</span>
+                                            <span className="text-prime-ink font-serif italic text-lg">{selectedProject.size}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-prime-muted text-[10px] tracking-widest uppercase mb-1">Category</span>
-                                            <span className="text-prime-ink font-medium">{selectedProject.type}</span>
+                                            <span className="block text-prime-muted text-[8px] tracking-widest uppercase mb-1 font-semibold">Category</span>
+                                            <span className="text-prime-ink font-semibold text-sm">{selectedProject.type}</span>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col sm:flex-row gap-4">
+                                    <div className="flex flex-col sm:flex-row gap-3">
                                         <a 
                                             href={selectedProject.reelUrl} 
                                             target="_blank" 
                                             rel="noreferrer" 
-                                            className="px-6 py-3 bg-prime-gold text-prime-ink text-xs font-semibold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors hover-trigger flex items-center justify-center gap-2"
+                                            className="px-5 py-3.5 bg-prime-gold text-prime-ink text-[10px] font-semibold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors hover-trigger flex items-center justify-center gap-2 rounded-lg"
                                         >
                                             Watch Video Tour ↗
                                         </a>
-                                        <a href="#connect" onClick={() => setSelectedProject(null)} className="px-6 py-3 border border-prime-ink/20 text-prime-ink text-xs font-semibold tracking-widest uppercase hover:border-prime-gold hover:text-prime-gold transition-colors hover-trigger flex items-center justify-center">
+                                        <button 
+                                            onClick={() => {
+                                                const message = `Hi Ashish, I am inquiring about: ${selectedProject.title} (${selectedProject.size}) located in ${selectedProject.location}. Please share availability.`;
+                                                window.open(`https://wa.me/${contactData?.phone?.replace('+', '')}?text=${encodeURIComponent(message)}`, '_blank');
+                                            }}
+                                            className="px-5 py-3.5 border border-prime-ink/20 text-prime-ink text-[10px] font-semibold tracking-widest uppercase hover:border-prime-gold hover:text-prime-gold transition-colors hover-trigger flex items-center justify-center rounded-lg"
+                                        >
                                             Inquire Now
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -613,8 +669,8 @@
             );
         };
 
-        // --- Footer Component ---
-        const Footer = () => {
+        // --- Connect & Dynamic Footer Section ---
+        const Footer = ({ data }) => {
             const [formData, setFormData] = useState({ name: '', message: '' });
             const [error, setError] = useState('');
 
@@ -624,27 +680,27 @@
                     setError('Please enter your name to connect.');
                     return;
                 }
-                const text = `Hello Ashish, I am ${formData.name}. ${formData.message}`;
-                window.open(`https://wa.me/918696996609?text=${encodeURIComponent(text)}`, '_blank');
+                const cleanPhone = (data?.phone || INITIAL_DEFAULT_CONFIG.contact.phone).replace('+', '');
+                const userMsg = formData.message.trim() ? ` ${formData.message}` : " I want to schedule a site tour.";
+                const text = `Hello Ashish, I am ${formData.name}.${userMsg}`;
+                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
                 setError('');
             };
 
             const handleCall = (e) => {
                 e.preventDefault();
-                window.location.href = 'tel:+918696996609';
+                window.location.href = `tel:${data?.phone || INITIAL_DEFAULT_CONFIG.contact.phone}`;
             };
 
             return (
-                <footer id="connect" className="bg-prime-ink text-prime-pearl py-24 md:py-32 px-6 md:px-12 relative overflow-hidden">
-                    {/* Subtle background decoration */}
+                <footer id="connect" className="bg-prime-ink text-prime-pearl py-20 md:py-28 px-6 md:px-12 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-prime-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
 
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-16 relative z-10">
                         <div className="w-full md:w-1/2">
                             <h2 className="font-serif text-5xl md:text-7xl mb-6 leading-tight">Ready to <br/><span className="italic text-prime-gold">Elevate?</span></h2>
-                            <p className="text-prime-pearl/60 max-w-sm mb-10 text-sm font-light">Bypass the delays. Connect with Ashish directly to claim your elite space in Jaipur.</p>
+                            <p className="text-prime-pearl/60 max-w-sm mb-10 text-xs md:text-sm font-light">Bypass the construction delays. Connect with Ashish directly to claim your elite space in Jaipur.</p>
                             
-                            {/* Inquiry Form */}
                             <form className="max-w-md space-y-6">
                                 <div>
                                     <input 
@@ -652,9 +708,9 @@
                                         placeholder="Your Name *"
                                         value={formData.name}
                                         onChange={(e) => { setFormData({...formData, name: e.target.value}); setError(''); }}
-                                        className="w-full bg-transparent border-b border-prime-pearl/20 pb-3 text-prime-pearl placeholder-prime-pearl/40 focus:outline-none focus:border-prime-gold transition-colors font-light text-sm"
+                                        className="w-full bg-transparent border-b border-prime-pearl/20 pb-3 text-prime-pearl placeholder-prime-pearl/30 focus:outline-none focus:border-prime-gold transition-colors font-light text-sm rounded-none"
                                     />
-                                    {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+                                    {error && <p className="text-red-400 text-[10px] mt-2 font-medium tracking-wide">{error}</p>}
                                 </div>
                                 <div>
                                     <input 
@@ -662,20 +718,20 @@
                                         placeholder="What are you looking for? (Optional)"
                                         value={formData.message}
                                         onChange={(e) => setFormData({...formData, message: e.target.value})}
-                                        className="w-full bg-transparent border-b border-prime-pearl/20 pb-3 text-prime-pearl placeholder-prime-pearl/40 focus:outline-none focus:border-prime-gold transition-colors font-light text-sm"
+                                        className="w-full bg-transparent border-b border-prime-pearl/20 pb-3 text-prime-pearl placeholder-prime-pearl/30 focus:outline-none focus:border-prime-gold transition-colors font-light text-sm rounded-none"
                                     />
                                 </div>
                                 
                                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                     <button 
                                         onClick={handleWhatsApp}
-                                        className="px-6 py-3 bg-prime-gold text-prime-ink text-xs font-semibold tracking-widest uppercase hover:bg-white transition-colors hover-trigger flex items-center justify-center gap-2"
+                                        className="px-6 py-3.5 bg-prime-gold text-prime-ink text-[10px] font-semibold tracking-widest uppercase hover:bg-white transition-colors hover-trigger flex items-center justify-center gap-2 rounded-lg"
                                     >
-                                        WhatsApp
+                                        Connect on WhatsApp
                                     </button>
                                     <button 
                                         onClick={handleCall}
-                                        className="px-6 py-3 border border-prime-pearl/30 text-prime-pearl text-xs font-semibold tracking-widest uppercase hover:border-prime-gold hover:text-prime-gold transition-colors hover-trigger flex items-center justify-center gap-2"
+                                        className="px-6 py-3.5 border border-prime-pearl/20 text-prime-pearl text-[10px] font-semibold tracking-widest uppercase hover:border-prime-gold hover:text-prime-gold transition-colors hover-trigger flex items-center justify-center gap-2 rounded-lg"
                                     >
                                         Call Directly
                                     </button>
@@ -683,52 +739,425 @@
                             </form>
                         </div>
 
-                        <div className="w-full md:w-1/3 flex flex-col gap-12 pt-4">
+                        <div className="w-full md:w-1/3 flex flex-col gap-10 pt-4">
                             <div>
-                                <h4 className="text-prime-gold text-[10px] tracking-[0.2em] uppercase mb-4">Corporate Office</h4>
-                                <p className="text-prime-pearl/80 font-serif text-xl leading-relaxed">
-                                    SM Tower 3 and 6<br/>
-                                    Baba market DCM<br/>
-                                    Vaishali Nagar, Jaipur<br/>
-                                    Rajasthan, India
+                                <h4 className="text-prime-gold text-[10px] tracking-[0.2em] font-semibold uppercase mb-4">Corporate Office</h4>
+                                <p className="text-prime-pearl/80 font-serif text-lg leading-relaxed">
+                                    {data?.address1 || INITIAL_DEFAULT_CONFIG.contact.address1}<br/>
+                                    {data?.address2 || INITIAL_DEFAULT_CONFIG.contact.address2}<br/>
+                                    {data?.address3 || INITIAL_DEFAULT_CONFIG.contact.address3}<br/>
+                                    {data?.addressState || INITIAL_DEFAULT_CONFIG.contact.addressState}
                                 </p>
                             </div>
                             <div>
-                                <h4 className="text-prime-gold text-[10px] tracking-[0.2em] uppercase mb-4">Connect</h4>
-                                <div className="flex flex-col space-y-3 text-prime-pearl/80 text-sm font-light">
-                                    <a href="https://instagram.com/smprimerealty" target="_blank" rel="noreferrer" className="hover:text-prime-gold transition-colors hover-trigger flex items-center gap-2 w-fit">
-                                        <span>@smprimerealty</span> (Instagram)
+                                <h4 className="text-prime-gold text-[10px] tracking-[0.2em] font-semibold uppercase mb-4">Connect</h4>
+                                <div className="flex flex-col space-y-3 text-prime-pearl/80 text-xs font-light">
+                                    <a href={data?.instagramLink || INITIAL_DEFAULT_CONFIG.contact.instagramLink} target="_blank" rel="noreferrer" className="hover:text-prime-gold transition-colors hover-trigger flex items-center gap-2 w-fit">
+                                        <span>{data?.instagram || INITIAL_DEFAULT_CONFIG.contact.instagram}</span> (Instagram)
                                     </a>
-                                    <a href="tel:+918696996609" className="hover:text-prime-gold transition-colors hover-trigger w-fit">
-                                        +91 8696996609
+                                    <a href={`tel:${data?.phone || INITIAL_DEFAULT_CONFIG.contact.phone}`} className="hover:text-prime-gold transition-colors hover-trigger w-fit font-medium">
+                                        {data?.phoneFormatted || INITIAL_DEFAULT_CONFIG.contact.phoneFormatted}
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-prime-pearl/10 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-widest text-prime-pearl/40 uppercase">
+                    <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-prime-pearl/10 flex flex-col md:flex-row justify-between items-center text-[9px] tracking-widest text-prime-pearl/40 uppercase">
                         <p>© 2026 SM Prime Realty.</p>
-                        <p className="mt-4 md:mt-0">Curated with precision.</p>
+                        <p className="mt-4 md:mt-0">Curated with utmost precision.</p>
                     </div>
                 </footer>
             );
         };
 
-        // --- Main App Component ---
+        // --- Custom Elegant CMS Admin Panel Component ---
+        const AdminPanel = ({ currentConfig, onSaveConfig, onClose }) => {
+            const [activeTab, setActiveTab] = useState('hero');
+            const [config, setConfig] = useState(JSON.parse(JSON.stringify(currentConfig)));
+
+            // Hero section handlers
+            const updateHero = (key, val) => {
+                setConfig(prev => ({ ...prev, hero: { ...prev.hero, [key]: val } }));
+            };
+
+            // Vision section handlers
+            const updateVision = (key, val) => {
+                setConfig(prev => ({ ...prev, vision: { ...prev.vision, [key]: val } }));
+            };
+
+            // Founder section handlers
+            const updateFounder = (key, val) => {
+                setConfig(prev => ({ ...prev, founder: { ...prev.founder, [key]: val } }));
+            };
+
+            // Contact section handlers
+            const updateContact = (key, val) => {
+                setConfig(prev => ({ ...prev, contact: { ...prev.contact, [key]: val } }));
+            };
+
+            // Amenities section handlers
+            const updateAmenity = (index, key, val) => {
+                const updated = [...config.amenities];
+                updated[index][key] = val;
+                setConfig(prev => ({ ...prev, amenities: updated }));
+            };
+
+            // Portfolio Project CRUD handlers
+            const updateProject = (index, key, val) => {
+                const updated = [...config.projects];
+                updated[index][key] = val;
+                setConfig(prev => ({ ...prev, projects: updated }));
+            };
+
+            const addProject = () => {
+                const newProj = {
+                    id: 'project-' + Date.now(),
+                    title: "New Premium Property",
+                    type: "Commercial",
+                    size: "5,000 Sq Ft",
+                    location: "C-Scheme, Jaipur",
+                    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600",
+                    desc: "Enter a brief luxury summary describing the unique layout, customized architectural panels, and strategic location advantages.",
+                    reelUrl: "https://www.instagram.com/reel/DW3Ow31kznq/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                };
+                setConfig(prev => ({ ...prev, projects: [...prev.projects, newProj] }));
+            };
+
+            const removeProject = (index) => {
+                const updated = config.projects.filter((_, idx) => idx !== index);
+                setConfig(prev => ({ ...prev, projects: updated }));
+            };
+
+            return (
+                <div className="fixed inset-y-0 right-0 z-[120] w-full max-w-2xl bg-prime-pearl shadow-2xl flex flex-col border-l border-prime-ink/10 text-prime-ink animate-[slideIn_0.4s_cubic-bezier(0.16,1,0.3,1)]">
+                    <style>{`@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
+                    
+                    {/* Panel Header */}
+                    <div className="p-6 border-b border-prime-ink/10 flex justify-between items-center bg-prime-surface">
+                        <div>
+                            <h2 className="font-serif text-2xl tracking-wide uppercase">Curation Engine</h2>
+                            <p className="text-[10px] uppercase tracking-widest text-prime-gold font-semibold">SM Prime Live CMS</p>
+                        </div>
+                        <button onClick={onClose} className="p-2 border border-prime-ink/10 rounded-full hover:bg-prime-ink hover:text-prime-pearl transition-colors hover-trigger">✕</button>
+                    </div>
+
+                    {/* Tab Navigation */}
+                    <div className="flex border-b border-prime-ink/5 overflow-x-auto whitespace-nowrap bg-prime-pearl">
+                        {['hero', 'vision', 'founder', 'amenities', 'portfolio', 'contact'].map(tab => (
+                            <button 
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-5 py-3 text-[10px] tracking-widest uppercase font-semibold border-b-2 transition-colors hover-trigger ${activeTab === tab ? 'border-prime-gold text-prime-gold bg-prime-surface/20' : 'border-transparent text-prime-muted hover:text-prime-ink'}`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Editor Form Area */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        
+                        {/* HERO TAB */}
+                        {activeTab === 'hero' && (
+                            <div className="space-y-4">
+                                <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Hero Visual Layout</h3>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Title Main Accent</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.hero.titleLine1} onChange={(e) => updateHero('titleLine1', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Title Secondary (Italic Gold)</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent font-serif italic" value={config.hero.titleLine2} onChange={(e) => updateHero('titleLine2', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Sub-heading Slogan</label>
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-20 text-xs" value={config.hero.subtitle} onChange={(e) => updateHero('subtitle', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Hero Background Image URL</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={config.hero.bgImage} onChange={(e) => updateHero('bgImage', e.target.value)} />
+                                    <img src={config.hero.bgImage} className="mt-2 w-full h-32 object-cover rounded" onError={(e) => { e.target.src = "https://placehold.co/800x600/EFEFEA/111111?text=Preview" }} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* VISION TAB */}
+                        {activeTab === 'vision' && (
+                            <div className="space-y-4">
+                                <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Vision Statements</h3>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Tagline Label</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.vision.tagline} onChange={(e) => updateVision('tagline', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Impact Headline</label>
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed" value={config.vision.headline} onChange={(e) => updateVision('headline', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Vision Narrative Description</label>
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-32 text-xs leading-relaxed" value={config.vision.description} onChange={(e) => updateVision('description', e.target.value)} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* FOUNDER TAB */}
+                        {activeTab === 'founder' && (
+                            <div className="space-y-4">
+                                <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Founder Profile</h3>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Founder Name</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.founder.name} onChange={(e) => updateFounder('name', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Professional Title</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.founder.title} onChange={(e) => updateFounder('title', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Signature Direct Quote</label>
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 font-serif italic text-xs leading-relaxed" value={config.founder.quote} onChange={(e) => updateFounder('quote', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Biography Paragraph 1</label>
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed" value={config.founder.bioParagraph1} onChange={(e) => updateFounder('bioParagraph1', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Biography Paragraph 2</label>
+                                    <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-24 text-xs leading-relaxed" value={config.founder.bioParagraph2} onChange={(e) => updateFounder('bioParagraph2', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Founder Photo URL</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={config.founder.image} onChange={(e) => updateFounder('image', e.target.value)} />
+                                    <img src={config.founder.image} className="mt-2 h-44 w-32 object-cover rounded shadow" onError={(e) => { e.target.src = INITIAL_DEFAULT_CONFIG.founder.image }} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* AMENITIES TAB */}
+                        {activeTab === 'amenities' && (
+                            <div className="space-y-6">
+                                <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Uncompromising Standards</h3>
+                                {config.amenities.map((item, index) => (
+                                    <div key={index} className="p-4 bg-prime-surface/40 rounded-xl space-y-3 border border-prime-ink/5">
+                                        <span className="text-[9px] font-bold tracking-widest text-prime-gold uppercase block">Standard #{index + 1}</span>
+                                        <div>
+                                            <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Feature Title</label>
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={item.title} onChange={(e) => updateAmenity(index, 'title', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Description</label>
+                                            <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-16 text-xs" value={item.desc} onChange={(e) => updateAmenity(index, 'desc', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Background Image URL</label>
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={item.img} onChange={(e) => updateAmenity(index, 'img', e.target.value)} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* PORTFOLIO TAB */}
+                        {activeTab === 'portfolio' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b border-prime-ink/5 pb-2">
+                                    <h3 className="font-serif text-lg">Real Estate Portfolio</h3>
+                                    <button onClick={addProject} className="px-3 py-1.5 bg-prime-gold text-prime-ink text-[9px] font-semibold tracking-wider uppercase rounded hover:bg-prime-ink hover:text-prime-pearl transition-all hover-trigger">+ Add New Property</button>
+                                </div>
+                                
+                                {config.projects.map((proj, index) => (
+                                    <div key={proj.id || index} className="p-4 bg-prime-surface/40 rounded-xl space-y-4 border border-prime-ink/5 relative">
+                                        <button onClick={() => removeProject(index)} className="absolute top-4 right-4 text-[10px] text-red-500 font-semibold tracking-wider hover:underline hover-trigger">DELETE CARD</button>
+                                        <span className="text-[9px] font-bold tracking-widest text-prime-gold uppercase block">Property #{index + 1}</span>
+                                        
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Property Title</label>
+                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.title} onChange={(e) => updateProject(index, 'title', e.target.value)} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Category Type</label>
+                                                <select className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.type} onChange={(e) => updateProject(index, 'type', e.target.value)}>
+                                                    <option value="Commercial">Commercial</option>
+                                                    <option value="Residential">Residential</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Zone Area Size (e.g. 18,500 Sq Ft)</label>
+                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.size} onChange={(e) => updateProject(index, 'size', e.target.value)} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Location Suburb (e.g. C-Scheme)</label>
+                                                <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={proj.location} onChange={(e) => updateProject(index, 'location', e.target.value)} />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Detailed Description (Inside Modal)</label>
+                                            <textarea className="w-full p-2 border border-prime-ink/10 rounded bg-transparent h-20 text-xs leading-relaxed" value={proj.desc} onChange={(e) => updateProject(index, 'desc', e.target.value)} />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">High-Res Card Image URL</label>
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={proj.img} onChange={(e) => updateProject(index, 'img', e.target.value)} />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[8px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Instagram Cinematic Reel URL</label>
+                                            <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs font-mono" value={proj.reelUrl} onChange={(e) => updateProject(index, 'reelUrl', e.target.value)} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* CONTACT TAB */}
+                        {activeTab === 'contact' && (
+                            <div className="space-y-4">
+                                <h3 className="font-serif text-lg border-b border-prime-ink/5 pb-2">Footer Contact Details</h3>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Office Line Address 1</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.address1} onChange={(e) => updateContact('address1', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Office Line Address 2</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.address2} onChange={(e) => updateContact('address2', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Office Line Address 3</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.address3} onChange={(e) => updateContact('address3', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">State & Country Line</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.addressState} onChange={(e) => updateContact('addressState', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Instagram Username Display (e.g. @smprimerealty)</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.instagram} onChange={(e) => updateContact('instagram', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Direct Instagram Hyperlink</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent text-xs" value={config.contact.instagramLink} onChange={(e) => updateContact('instagramLink', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">System Action Call Phone (Format: +91...)</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.phone} onChange={(e) => updateContact('phone', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="block text-[9px] uppercase tracking-wider font-semibold text-prime-muted mb-1">Formatted Visual Phone (Format: +91 86...)</label>
+                                    <input type="text" className="w-full p-2 border border-prime-ink/10 rounded bg-transparent" value={config.contact.phoneFormatted} onChange={(e) => updateContact('phoneFormatted', e.target.value)} />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Panel Footer Controls */}
+                    <div className="p-4 border-t border-prime-ink/10 bg-prime-surface flex gap-3">
+                        <button 
+                            onClick={() => onSaveConfig(config)}
+                            className="flex-1 py-3 bg-prime-gold text-prime-ink text-[10px] font-bold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors rounded-lg hover-trigger"
+                        >
+                            Publish Live Setup
+                        </button>
+                        <button 
+                            onClick={onClose}
+                            className="px-5 py-3 border border-prime-ink/10 text-prime-ink text-[10px] font-bold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors rounded-lg hover-trigger"
+                        >
+                            Discard
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Main App Root Component ---
         const App = () => {
             const [loading, setLoading] = useState(true);
+            const [config, setConfig] = useState(INITIAL_DEFAULT_CONFIG);
+            const [isAdminOpen, setIsAdminOpen] = useState(false);
+            const [showPasscodeModal, setShowPasscodeModal] = useState(false);
+            const [enteredPasscode, setEnteredPasscode] = useState('');
+            const [passcodeError, setPasscodeError] = useState('');
+            const [showSuccessToast, setShowSuccessToast] = useState(false);
+            const [firebaseConnected, setFirebaseConnected] = useState(false);
 
-            // Initialize Lenis Smooth Scroll
+            // Access points for Firestore
+            const dbRef = useRef(null);
+            const docRef = useRef(null);
+
+            // --- Realtime Sync Engine ---
+            useEffect(() => {
+                const initFirebase = async () => {
+                    const FC = window.FirebaseConnector;
+                    if (!FC) {
+                        setLoading(false);
+                        return;
+                    }
+
+                    try {
+                        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sm-prime-realty-prod';
+                        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+                        if (!firebaseConfig) {
+                            setLoading(false);
+                            return;
+                        }
+
+                        const app = FC.initializeApp(firebaseConfig);
+                        const auth = FC.getAuth(app);
+                        const db = FC.getFirestore(app);
+                        dbRef.current = db;
+
+                        // Perform Authentication first
+                        if (initialToken) {
+                            await FC.signInWithCustomToken(auth, initialToken);
+                        } else {
+                            await FC.signInAnonymously(auth);
+                        }
+
+                        // Establish direct link to isolating artifact configuration block
+                        const configDocPath = FC.doc(db, 'artifacts', appId, 'public', 'data', 'config', 'sm-prime-live');
+                        docRef.current = configDocPath;
+
+                        // Set up reactive, real-time subscriber (onSnapshot)
+                        const unsubscribe = FC.onSnapshot(configDocPath, (docSnapshot) => {
+                            if (docSnapshot.exists()) {
+                                const liveData = docSnapshot.data();
+                                setConfig(liveData);
+                            } else {
+                                // First-time setup auto population: write fallback default payload
+                                FC.setDoc(configDocPath, INITIAL_DEFAULT_CONFIG);
+                            }
+                            setFirebaseConnected(true);
+                        }, (err) => {
+                            console.error("Live configuration sync error:", err);
+                        });
+
+                        return () => unsubscribe();
+                    } catch (e) {
+                        console.error("Firebase auth initialization failed:", e);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                initFirebase();
+            }, []);
+
+            // --- Lenis Smooth scroll dynamic handler ---
             useEffect(() => {
                 const lenis = new Lenis({
                     duration: 1.2,
-                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // expoOut
+                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
                     direction: 'vertical',
                     gestureDirection: 'vertical',
                     smooth: true,
                     smoothTouch: false,
-                    touchMultiplier: 2,
+                    touchMultiplier: 1.8,
                 });
 
                 function raf(time) {
@@ -737,9 +1166,8 @@
                 }
                 requestAnimationFrame(raf);
 
-                // Connect GSAP ScrollTrigger to Lenis
                 lenis.on('scroll', ScrollTrigger.update);
-                gsap.ticker.add((time)=>{
+                gsap.ticker.add((time) => {
                     lenis.raf(time * 1000);
                 });
                 gsap.ticker.lagSmoothing(0, 0);
@@ -750,23 +1178,170 @@
                 };
             }, []);
 
+            const handleScrollToSection = (id) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            const handlePasscodeSubmit = (e) => {
+                e.preventDefault();
+                // Core passcode logic: 8696 (Last four digits of Ashish Yadav's direct phone number)
+                if (enteredPasscode === '8696') {
+                    setShowPasscodeModal(false);
+                    setIsAdminOpen(true);
+                    setEnteredPasscode('');
+                    setPasscodeError('');
+                } else {
+                    setPasscodeError('Invalid Code. Authorization denied.');
+                }
+            };
+
+            const handlePublishConfigChanges = async (newConfig) => {
+                if (docRef.current && window.FirebaseConnector) {
+                    try {
+                        await window.FirebaseConnector.setDoc(docRef.current, newConfig);
+                        setConfig(newConfig);
+                        setIsAdminOpen(false);
+                        
+                        // Fire toast success alert
+                        setShowSuccessToast(true);
+                        setTimeout(() => setShowSuccessToast(false), 4000);
+                    } catch (err) {
+                        console.error("Failed to commit config data payload to Firestore:", err);
+                    }
+                } else {
+                    // Failback local memory simulation state
+                    setConfig(newConfig);
+                    setIsAdminOpen(false);
+                    setShowSuccessToast(true);
+                    setTimeout(() => setShowSuccessToast(false), 4000);
+                }
+            };
+
+            const handleRestoreOriginalDefaults = async () => {
+                if (docRef.current && window.FirebaseConnector) {
+                    try {
+                        await window.FirebaseConnector.setDoc(docRef.current, INITIAL_DEFAULT_CONFIG);
+                        setConfig(INITIAL_DEFAULT_CONFIG);
+                        setIsAdminOpen(false);
+                        setShowSuccessToast(true);
+                        setTimeout(() => setShowSuccessToast(false), 4000);
+                    } catch (err) {
+                        console.error("Restoring operation encountered database error:", err);
+                    }
+                } else {
+                    setConfig(INITIAL_DEFAULT_CONFIG);
+                    setIsAdminOpen(false);
+                }
+            };
+
             return (
                 <div className="relative selection:bg-prime-gold/30 selection:text-prime-ink">
                     <CustomCursor />
                     {loading && <Preloader setLoading={setLoading} />}
                     
-                    <Navbar />
+                    <Navbar onSectionScroll={handleScrollToSection} />
 
                     <main className={loading ? 'opacity-0' : 'opacity-100 transition-opacity duration-1000'}>
-                        <Hero />
+                        <Hero data={config.hero} />
                         <Marquee />
-                        <Vision />
-                        <Founder />
-                        <Amenities />
-                        <Portfolio />
+                        <Vision data={config.vision} />
+                        <Founder data={config.founder} />
+                        <Amenities items={config.amenities} />
+                        <Portfolio items={config.projects} contactData={config.contact} />
                     </main>
 
-                    <Footer />
+                    <Footer data={config.contact} />
+
+                    {/* --- Admin Engine Dynamic Activation Lock --- */}
+                    <button 
+                        onClick={() => setShowPasscodeModal(true)} 
+                        className="fixed bottom-6 right-6 z-[90] w-12 h-12 bg-prime-pearl border border-prime-ink/10 rounded-full flex items-center justify-center hover-trigger shadow-lg hover:bg-prime-ink hover:text-prime-pearl transition-colors duration-300 group"
+                        title="Open Curation Panel"
+                    >
+                        <svg className="w-5 h-5 fill-current transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
+                            <path d="M12 2C8.69 2 6 4.69 6 8v4c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-6c0-1.1-.9-2-2-2V8c0-3.31-2.69-6-6-6zm-4 6c0-2.21 1.79-4 4-4s4 1.79 4 4v4H8V8zm8 12H8v-6h8v6zm-4-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                        </svg>
+                    </button>
+
+                    {/* Passcode Modal Overlay Gate */}
+                    {showPasscodeModal && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 glass-modal animate-[fadeIn_0.3s_forwards]">
+                            <style>{`@keyframes fadeIn { to { opacity: 1; } }`}</style>
+                            <form onSubmit={handlePasscodeSubmit} className="bg-prime-pearl border border-prime-ink/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center">
+                                <span className="text-prime-gold text-[10px] tracking-[0.3em] font-semibold uppercase mb-2">Secure Access Gate</span>
+                                <h3 className="font-serif text-2xl text-prime-ink mb-6 text-center">Open Live Curation</h3>
+                                
+                                <p className="text-[10px] text-center text-prime-muted uppercase tracking-wider mb-6 max-w-xs">
+                                    Enter passcode (Hint: 8696)
+                                </p>
+
+                                <input 
+                                    type="password"
+                                    maxLength={4}
+                                    value={enteredPasscode}
+                                    onChange={(e) => {
+                                        setEnteredPasscode(e.target.value.replace(/\D/g, ''));
+                                        setPasscodeError('');
+                                    }}
+                                    placeholder="••••"
+                                    className="w-28 tracking-[1em] text-center text-xl font-bold bg-transparent border-b-2 border-prime-ink/20 pb-2 focus:outline-none focus:border-prime-gold transition-colors mb-4 placeholder-prime-ink/20"
+                                    autoFocus
+                                />
+
+                                {passcodeError && (
+                                    <p className="text-red-500 text-[9px] tracking-wide uppercase font-semibold mb-4 text-center">{passcodeError}</p>
+                                )}
+
+                                <div className="flex gap-3 w-full mt-4">
+                                    <button 
+                                        type="submit"
+                                        className="flex-1 py-3 bg-prime-ink text-prime-pearl text-[10px] font-bold tracking-widest uppercase hover:bg-prime-gold hover:text-prime-ink transition-colors rounded-lg hover-trigger"
+                                    >
+                                        Authorize
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => { setShowPasscodeModal(false); setEnteredPasscode(''); setPasscodeError(''); }}
+                                        className="px-5 py-3 border border-prime-ink/10 text-prime-ink text-[10px] font-bold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors rounded-lg hover-trigger"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* Live Curation Editing Panel Drawer */}
+                    {isAdminOpen && (
+                        <AdminPanel 
+                            currentConfig={config} 
+                            onSaveConfig={handlePublishConfigChanges} 
+                            onClose={() => setIsAdminOpen(false)} 
+                        />
+                    )}
+
+                    {/* System Action Success Toast Alert */}
+                    {showSuccessToast && (
+                        <div className="fixed bottom-6 left-6 z-[130] bg-prime-ink text-prime-pearl border border-prime-gold/30 rounded-xl px-6 py-4 flex flex-col gap-1 shadow-2xl animate-[slideUp_0.4s_ease-out]">
+                            <style>{`@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
+                            <span className="text-[9px] font-semibold tracking-widest uppercase text-prime-gold">Dynamic Sync Activated</span>
+                            <p className="text-[11px] font-medium tracking-wider">Website published and updated successfully on live servers!</p>
+                        </div>
+                    )}
+
+                    {/* Developer Master Reset Lock */}
+                    {isAdminOpen && (
+                        <button 
+                            onClick={handleRestoreOriginalDefaults}
+                            className="fixed bottom-6 left-6 z-[140] bg-red-600 hover:bg-red-800 text-white text-[9px] font-bold tracking-widest uppercase px-4 py-2.5 rounded-lg shadow-2xl hover-trigger transition-all"
+                            title="Reset all content back to factory design configuration layout templates"
+                        >
+                            Reset Factory Layout
+                        </button>
+                    )}
                 </div>
             );
         };
