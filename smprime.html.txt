@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM Prime Realty | Premium Spaces Jaipur</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- Lenis for buttery smooth scrolling -->
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        prime: {
+                            pearl: '#F8F8F5',    // Lighter, cleaner warm white
+                            surface: '#EFEFEA',  // Contrast section background
+                            ink: '#111111',      // Deepest charcoal
+                            gold: '#B39369',     // Refined champagne/bronze
+                            muted: '#8A8A8A'     // Elegant gray
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                    },
+                    transitionTimingFunction: {
+                        'expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap');
+        
+        body {
+            background-color: #F8F8F5;
+            color: #111111;
+            margin: 0;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            cursor: none;
+        }
+
+        /* Subtle Noise Overlay for premium print feel */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #F8F8F5; }
+        ::-webkit-scrollbar-thumb { background: #EFEFEA; }
+        ::-webkit-scrollbar-thumb:hover { background: #B39369; }
+
+        /* Custom Cursor Elements */
+        .cursor-dot {
+            width: 6px; height: 6px;
+            background-color: #111111;
+            border-radius: 50%;
+            position: fixed;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-outline {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(17, 17, 17, 0.2);
+            border-radius: 50%;
+            position: fixed;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, border-color 0.3s, background-color 0.3s;
+        }
+        body:hover .cursor-outline.hovered {
+            width: 70px; height: 70px;
+            border-color: #B39369;
+            background-color: rgba(179, 147, 105, 0.05);
+            backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 768px) {
+            body { cursor: auto; }
+            .cursor-dot, .cursor-outline { display: none; }
+        }
+
+        /* Utility Classes for Animations */
+        .text-reveal-mask { clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); overflow: hidden; }
+        .text-reveal-inner { transform: translateY(110%); }
+        
+        .img-parallax-container { overflow: hidden; position: relative; }
+        .img-parallax { height: 120%; width: 100%; object-fit: cover; transform-origin: center; }
+
+        .marquee-container { display: flex; overflow: hidden; white-space: nowrap; }
+        .marquee-content { display: flex; animation: marquee 25s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .glass-modal { background: rgba(248, 248, 245, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        
+        /* Smooth scrolling utility */
+        html.lenis { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div class="noise-overlay"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useLayoutEffect, useRef } = React;
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- Custom Cursor Component ---
+        const CustomCursor = () => {
+            const dotRef = useRef(null);
+            const outlineRef = useRef(null);
+
+            useEffect(() => {
+                const moveCursor = (e) => {
+                    gsap.to(dotRef.current, { x: e.clientX, y: e.clientY, duration: 0, ease: "none" });
+                    gsap.to(outlineRef.current, { x: e.clientX, y: e.clientY, duration: 0.2, ease: "power2.out" });
+                };
+                const handleMouseOver = (e) => {
+                    if (e.target.closest('button, a, .hover-trigger')) {
+                        outlineRef.current.classList.add('hovered');
+                    } else {
+                        outlineRef.current.classList.remove('hovered');
+                    }
+                };
+                window.addEventListener('mousemove', moveCursor);
+                window.addEventListener('mouseover', handleMouseOver);
+                return () => {
+                    window.removeEventListener('mousemove', moveCursor);
+                    window.removeEventListener('mouseover', handleMouseOver);
+                };
+            }, []);
+
+            return (
+                <>
+                    <div ref={dotRef} className="cursor-dot hidden md:block"></div>
+                    <div ref={outlineRef} className="cursor-outline hidden md:block"></div>
+                </>
+            );
+        };
+
+        // --- Preloader Component ---
+        const Preloader = ({ setLoading }) => {
+            const containerRef = useRef(null);
+            const textRef = useRef(null);
+
+            useLayoutEffect(() => {
+                const ctx = gsap.context(() => {
+                    const tl = gsap.timeline({
+                        onComplete: () => {
+                            gsap.to(containerRef.current, {
+                                yPercent: -100,
+                                duration: 1.2,
+                                ease: "power4.inOut",
+                                onComplete: () => setLoading(false)
+                            });
+                        }
+                    });
+
+                    tl.to(textRef.current, { y: 0, duration: 1.5, ease: "power4.out", delay: 0.3 })
+                      .to(textRef.current, { opacity: 0, duration: 0.5, delay: 0.8 });
+                });
+                return () => ctx.revert();
+            }, []);
+
+            return (
+                <div ref={containerRef} className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-prime-pearl">
+                    <div className="text-reveal-mask">
+                        <h1 ref={textRef} className="text-reveal-inner font-serif text-3xl md:text-5xl text-prime-ink tracking-[0.2em] uppercase text-center flex flex-col items-center gap-2">
+                            <span>SM Prime</span>
+                            <span className="italic text-prime-gold">Realty</span>
+                        </h1>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Navbar Component ---
+        const Navbar = () => {
+            const handleScroll = (id) => {
+                const element = document.getElementById(id);
+                if(element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            return (
+                <nav className="fixed w-full top-0 z-50 px-6 py-6 md:px-12 flex justify-between items-center bg-gradient-to-b from-prime-pearl/95 to-transparent backdrop-blur-sm">
+                    <div onClick={() => handleScroll('hero')} className="font-serif text-xl md:text-2xl tracking-[0.15em] uppercase text-prime-ink cursor-pointer hover-trigger flex flex-col">
+                        <span>SM Prime</span>
+                        <span className="text-[0.5em] font-sans tracking-[0.3em] text-prime-muted">Realty</span>
+                    </div>
+                    <div className="hidden md:flex space-x-10 text-[10px] font-medium tracking-[0.2em] uppercase text-prime-ink">
+                        {['Vision', 'Founder', 'Amenities', 'Portfolio', 'Connect'].map((tab) => (
+                            <button 
+                                key={tab} 
+                                onClick={() => handleScroll(tab.toLowerCase())} 
+                                className="hover:text-prime-gold transition-colors hover-trigger relative group"
+                            >
+                                {tab}
+                                <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-prime-gold transition-all duration-300 group-hover:w-full"></span>
+                            </button>
+                        ))}
+                    </div>
+                    {/* Mobile Menu Button - simplified for prototype */}
+                    <button onClick={() => handleScroll('connect')} className="md:hidden text-xs tracking-widest uppercase border-b border-prime-ink pb-1">Connect</button>
+                </nav>
+            );
+        };
+
+        // --- Hero Component ---
+        const Hero = () => {
+            const heroRef = useRef(null);
+
+            useLayoutEffect(() => {
+                const ctx = gsap.context(() => {
+                    gsap.from('.hero-title span', {
+                        y: 100,
+                        opacity: 0,
+                        duration: 1.5,
+                        stagger: 0.1,
+                        ease: 'power4.out',
+                        delay: 2.5 // wait for preloader
+                    });
+                    gsap.from('.hero-sub', {
+                        opacity: 0,
+                        duration: 1,
+                        delay: 3.2,
+                        ease: 'power2.out'
+                    });
+                    gsap.to('.hero-bg', {
+                        scale: 1.1,
+                        duration: 20,
+                        ease: 'none',
+                        repeat: -1,
+                        yoyo: true
+                    });
+                }, heroRef);
+                return () => ctx.revert();
+            }, []);
+
+            return (
+                <section id="hero" ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden bg-prime-pearl">
+                    {/* Background */}
+                    <div className="absolute inset-0 z-0 overflow-hidden">
+                        <img 
+                            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=2000" 
+                            alt="Luxury Architecture" 
+                            className="hero-bg w-full h-full object-cover opacity-50 mix-blend-multiply grayscale-[30%]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-prime-pearl via-transparent to-prime-pearl/40"></div>
+                    </div>
+
+                    <div className="relative z-10 text-center px-6 mt-16 flex flex-col items-center">
+                        <h1 className="hero-title font-serif text-5xl md:text-8xl lg:text-9xl text-prime-ink leading-[0.9] tracking-tight flex flex-col md:flex-row gap-2 md:gap-6 overflow-hidden">
+                            <span className="block transform translate-y-0">Curated</span>
+                            <span className="block italic text-prime-gold transform translate-y-0">Spaces.</span>
+                        </h1>
+                        <p className="hero-sub mt-8 text-[10px] md:text-xs font-medium tracking-[0.3em] text-prime-ink/80 uppercase max-w-md mx-auto">
+                            Jaipur's most exclusive ready-to-move premium infrastructure.
+                        </p>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Vision Component ---
+        const Vision = () => {
+            const sectionRef = useRef(null);
+
+            useLayoutEffect(() => {
+                const ctx = gsap.context(() => {
+                    gsap.from('.vision-text', {
+                        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' },
+                        y: 40, opacity: 0, duration: 1, stagger: 0.15, ease: 'power3.out'
+                    });
+                }, sectionRef);
+                return () => ctx.revert();
+            }, []);
+
+            return (
+                <section id="vision" ref={sectionRef} className="py-24 md:py-40 px-6 md:px-12 bg-prime-pearl relative z-10">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <h3 className="vision-text text-prime-gold text-xs tracking-[0.3em] uppercase mb-8">The Vision</h3>
+                        <h2 className="vision-text font-serif text-3xl md:text-5xl text-prime-ink leading-tight mb-10">
+                            Time is your most expensive asset. <br className="hidden md:block"/>
+                            <span className="italic text-prime-ink/70">Kyu waste karna mahino interior design aur contractor ke delays mein?</span>
+                        </h2>
+                        <p className="vision-text text-prime-ink/70 font-light leading-relaxed text-sm md:text-base max-w-2xl mx-auto">
+                            Plug & Play. Elite spaces, designed for peak performance. You bring the vision, we provide the headquarters. Experience architectural grandeur without the friction of construction.
+                        </p>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Founder Component ---
+        const Founder = () => {
+            const sectionRef = useRef(null);
+            
+            useLayoutEffect(() => {
+                const ctx = gsap.context(() => {
+                    gsap.from('.founder-anim', {
+                        y: 40, opacity: 0, duration: 1, stagger: 0.15, ease: "power3.out",
+                        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" }
+                    });
+                }, sectionRef);
+                return () => ctx.revert();
+            }, []);
+
+            return (
+                <section id="founder" ref={sectionRef} className="py-24 md:py-32 px-6 md:px-12 bg-prime-surface border-t border-prime-ink/5">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row-reverse gap-16 md:gap-24 items-center">
+                        <div className="w-full md:w-1/2">
+                            <h3 className="founder-anim text-prime-gold text-xs tracking-[0.3em] uppercase mb-4">Meet the Founder</h3>
+                            <h2 className="founder-anim font-serif text-4xl md:text-5xl text-prime-ink leading-tight mb-2">Ashish Yadav</h2>
+                            <p className="founder-anim text-xs uppercase tracking-widest text-prime-muted mb-8">Lead Curator & Visionary</p>
+                            
+                            <blockquote className="founder-anim text-prime-ink/80 text-lg md:text-xl font-serif italic leading-relaxed mb-8 border-l-2 border-prime-gold pl-6">
+                                "Your environment dictates your execution. We didn't just want to build offices; we wanted to engineer elite sanctuaries where Jaipur's most ambitious minds could accelerate without friction."
+                            </blockquote>
+                            
+                            <p className="founder-anim text-prime-ink/70 leading-relaxed font-light mb-6 text-sm">
+                                Recognizing a massive gap in the luxury commercial and residential market, Ashish pioneered the "Plug & Play Empire" concept in Jaipur. His vision eliminates the chaotic months spent dealing with contractors, interior designers, and setup delays.
+                            </p>
+                            <p className="founder-anim text-prime-ink/70 leading-relaxed font-light text-sm">
+                                Today, SM Prime Realty stands as the benchmark for premium, zero-delay real estate.
+                            </p>
+                        </div>
+                        <div className="w-full md:w-1/2 founder-anim relative">
+                            <div className="aspect-[3/4] rounded-xl overflow-hidden bg-prime-pearl relative shadow-sm">
+                                {/* Customized Founder Portrait */}
+                                <img src="https://rtrlavnozuljuajhwamz.supabase.co/storage/v1/object/public/photoes/Gemini_Generated_Image_ue7nh5ue7nh5ue7n.png" alt="Ashish Yadav - Founder" className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-prime-ink/30 to-transparent"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Marquee Component ---
+        const Marquee = () => {
+            const words = ["C-Scheme", "Vaishali Nagar", "Malviya Nagar", "Jagatpura", "Bapu Nagar", "DCM"];
+            return (
+                <div className="py-8 border-y border-prime-ink/10 bg-prime-surface overflow-hidden">
+                    <div className="marquee-container">
+                        <div className="marquee-content items-center">
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="flex items-center">
+                                    {words.map((word, j) => (
+                                        <React.Fragment key={`${i}-${j}`}>
+                                            <span className="text-2xl md:text-4xl font-serif italic mx-6 text-prime-ink/80 whitespace-nowrap">{word}</span>
+                                            <span className="text-prime-gold text-xl mx-2">✦</span>
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Amenities (Services) Component - Sticky Layout ---
+        const Amenities = () => {
+            const [activeImg, setActiveImg] = useState(0);
+            const amenities = [
+                { title: "Zero Setup Delay", desc: "Walk in, plug in, and start scaling. Fully furnished with ergonomic Herman Miller seating and robust high-speed infrastructure.", img: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=1600" },
+                { title: "Architectural Grandeur", desc: "Designed by top-tier interior architects utilizing natural light, premium acoustics, and Vastu-compliant layouts for maximum productivity.", img: "https://images.unsplash.com/photo-1556800623-2895ab260a99?auto=format&fit=crop&q=80&w=1600" },
+                { title: "Enterprise Security", desc: "Biometric access, 24/7 surveillance, and enterprise-grade network security protocols pre-installed to protect your assets.", img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1600" },
+                { title: "Curated Environment", desc: "From premium coffee bars to dedicated wellness zones, every square foot is optimized for elite corporate culture.", img: "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=1600" }
+            ];
+
+            return (
+                <section id="amenities" className="py-24 md:py-40 px-6 md:px-12 bg-prime-pearl">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
+                        <div className="w-full md:w-1/2 md:sticky md:top-32 h-fit">
+                            <h3 className="text-prime-gold text-xs tracking-[0.3em] uppercase mb-6">The Standard</h3>
+                            <h2 className="font-serif text-4xl md:text-5xl text-prime-ink mb-12">Uncompromising <br/><span className="italic">Quality.</span></h2>
+                            
+                            <div className="space-y-8">
+                                {amenities.map((item, idx) => (
+                                    <div 
+                                        key={idx} 
+                                        className="border-t border-prime-ink/10 pt-8 cursor-pointer group hover-trigger"
+                                        onMouseEnter={() => setActiveImg(idx)}
+                                    >
+                                        <h3 className={`text-2xl font-serif transition-colors duration-300 ${activeImg === idx ? 'text-prime-gold italic' : 'text-prime-ink group-hover:text-prime-ink/70'}`}>
+                                            {item.title}
+                                        </h3>
+                                        <div className={`overflow-hidden transition-all duration-500 ease-expo ${activeImg === idx ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                            <p className="text-prime-ink/70 text-sm leading-relaxed pr-8 font-light">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="w-full md:w-1/2 h-[50vh] md:h-[70vh] rounded-2xl overflow-hidden relative">
+                            {amenities.map((item, idx) => (
+                                <img 
+                                    key={idx}
+                                    src={item.img} 
+                                    alt={item.title}
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${activeImg === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Portfolio Component ---
+        const Portfolio = () => {
+            const [filter, setFilter] = useState('All');
+            const [selectedProject, setSelectedProject] = useState(null);
+            const gridRef = useRef(null);
+
+            const projects = [
+                { 
+                    id: 1, 
+                    title: "The Paragon Hub", 
+                    type: "Commercial", 
+                    size: "18,500 Sq Ft", 
+                    location: "Vaishali Nagar", 
+                    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "An avant-garde corporate enclave engineered for high-performance scale. Features curated custom-built lounges, bespoke workspaces, and top-tier amenities that allow fast-scaling brands to perform at peak capacity from day one.",
+                    reelUrl: "https://www.instagram.com/reel/DW3Ow31kznq/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: 2, 
+                    title: "The Prestige Suites", 
+                    type: "Residential", 
+                    size: "5,800 Sq Ft", 
+                    location: "C-Scheme", 
+                    img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "A breathtaking residential sanctuary where architectural heritage meets absolute modern refinement. Designed with premium high-end automation, Italian marbles, custom architectural glass panels, and absolute acoustic comfort.",
+                    reelUrl: "https://www.instagram.com/reel/DWq8E8ik-Ud/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: 3, 
+                    title: "Aetherial Workspace", 
+                    type: "Commercial", 
+                    size: "12,000 Sq Ft", 
+                    location: "DCM, Vaishali Nagar", 
+                    img: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "An ultra-premium corporate headquarter concept featuring private executive glass offices, modern conference rooms, custom library lounges, and built-in premium wellness hubs designed to inspire teams to build empires.",
+                    reelUrl: "https://www.instagram.com/reel/DWoasYJk-sA/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: 4, 
+                    title: "The Zenith Office Suite", 
+                    type: "Commercial", 
+                    size: "9,200 Sq Ft", 
+                    location: "Malviya Nagar", 
+                    img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "Crafted exclusively for ambitious corporate operations, this fully-integrated workplace features a state-of-the-art security suite, custom layout modules, smart thermal controls, and panoramic vistas of Jaipur's prime skyline.",
+                    reelUrl: "https://www.instagram.com/reel/DWi4H8bE2cX/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                },
+                { 
+                    id: 5, 
+                    title: "Monarch Penthouses", 
+                    type: "Residential", 
+                    size: "6,550 Sq Ft", 
+                    location: "Bapu Nagar", 
+                    img: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&q=80&w=1600", 
+                    desc: "An ultra-luxe residence with high ceilings, wrapping floor-to-ceiling glass windows, a private sunset terrace lounge, and carefully chosen custom art accents that cultivate an environment of absolute sophistication and tranquility.",
+                    reelUrl: "https://www.instagram.com/reel/DWgUeX0E9G0/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                }
+            ];
+
+            const filtered = filter === 'All' ? projects : projects.filter(p => p.type === filter);
+
+            useLayoutEffect(() => {
+                if(gridRef.current) {
+                    gsap.fromTo(gridRef.current.children, 
+                        { opacity: 0, y: 30 },
+                        { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" }
+                    );
+                }
+            }, [filter]);
+
+            return (
+                <section id="portfolio" className="py-24 md:py-40 px-6 md:px-12 bg-prime-surface">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                            <div>
+                                <h3 className="text-prime-gold text-xs tracking-[0.3em] uppercase mb-4">Curated Spaces</h3>
+                                <h2 className="font-serif text-5xl md:text-6xl text-prime-ink">Selected <br/><span className="italic text-prime-gold">Works.</span></h2>
+                            </div>
+                            
+                            <div className="flex space-x-6 border-b border-prime-ink/20 pb-2">
+                                {['All', 'Commercial', 'Residential'].map(cat => (
+                                    <button 
+                                        key={cat}
+                                        onClick={() => setFilter(cat)}
+                                        className={`uppercase text-[10px] md:text-xs tracking-widest hover-trigger pb-2 relative transition-colors ${filter === cat ? 'text-prime-ink font-medium' : 'text-prime-muted hover:text-prime-ink'}`}
+                                    >
+                                        {cat}
+                                        {filter === cat && <span className="absolute bottom-[-1px] left-0 w-full h-[1px] bg-prime-ink"></span>}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+                            {filtered.map((project) => (
+                                <div key={project.id} className="group cursor-pointer hover-trigger" onClick={() => setSelectedProject(project)}>
+                                    <div className="img-parallax-container aspect-[4/3] rounded-xl mb-6 overflow-hidden bg-prime-pearl relative">
+                                        <img 
+                                            src={project.img} 
+                                            alt={project.title} 
+                                            className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
+                                        />
+                                        <div className="absolute top-4 right-4 bg-prime-pearl/90 backdrop-blur-sm px-3 py-1 rounded-full border border-prime-ink/5 flex items-center space-x-1">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-prime-gold animate-ping"></span>
+                                            <span className="text-[9px] uppercase tracking-wider font-semibold text-prime-ink">Cinematic Tour Available</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="font-serif text-3xl text-prime-ink mb-1 group-hover:text-prime-gold transition-colors">{project.title}</h3>
+                                            <p className="text-prime-muted text-xs uppercase tracking-wider">{project.type}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xs tracking-widest uppercase text-prime-ink">{project.location}</p>
+                                            <p className="text-prime-gold text-sm mt-1 font-serif italic">{project.size}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Quick View Modal */}
+                    {selectedProject && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 glass-modal opacity-0 animate-[fadeIn_0.3s_forwards]">
+                            <style>{`@keyframes fadeIn { to { opacity: 1; } }`}</style>
+                            <div className="bg-prime-pearl w-full max-w-5xl rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
+                                <button onClick={() => setSelectedProject(null)} className="absolute top-4 right-4 z-10 w-10 h-10 bg-prime-surface border border-prime-ink/10 text-prime-ink rounded-full flex items-center justify-center hover-trigger hover:bg-prime-ink hover:text-prime-pearl transition-colors">✕</button>
+                                <div className="w-full md:w-1/2 h-[35vh] md:h-[70vh] relative">
+                                    <img src={selectedProject.img} alt={selectedProject.title} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                                        <a href={selectedProject.reelUrl} target="_blank" rel="noreferrer" className="w-16 h-16 rounded-full bg-prime-pearl/95 flex items-center justify-center shadow-lg hover:scale-110 transition-transform hover-trigger group">
+                                            <span className="text-prime-gold text-xl pl-1 group-hover:scale-105 transition-transform">▶</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
+                                    <span className="text-prime-gold text-xs tracking-[0.2em] uppercase mb-4">{selectedProject.location}</span>
+                                    <h3 className="font-serif text-4xl md:text-5xl text-prime-ink mb-6">{selectedProject.title}</h3>
+                                    <p className="text-prime-ink/70 mb-8 leading-relaxed font-light text-sm md:text-base">{selectedProject.desc}</p>
+                                    
+                                    <div className="grid grid-cols-2 gap-6 mb-10 border-t border-b border-prime-ink/10 py-6">
+                                        <div>
+                                            <span className="block text-prime-muted text-[10px] tracking-widest uppercase mb-1">Space Area</span>
+                                            <span className="text-prime-ink font-serif italic text-xl">{selectedProject.size}</span>
+                                        </div>
+                                        <div>
+                                            <span className="block text-prime-muted text-[10px] tracking-widest uppercase mb-1">Category</span>
+                                            <span className="text-prime-ink font-medium">{selectedProject.type}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <a 
+                                            href={selectedProject.reelUrl} 
+                                            target="_blank" 
+                                            rel="noreferrer" 
+                                            className="px-6 py-3 bg-prime-gold text-prime-ink text-xs font-semibold tracking-widest uppercase hover:bg-prime-ink hover:text-prime-pearl transition-colors hover-trigger flex items-center justify-center gap-2"
+                                        >
+                                            Watch Video Tour ↗
+                                        </a>
+                                        <a href="#connect" onClick={() => setSelectedProject(null)} className="px-6 py-3 border border-prime-ink/20 text-prime-ink text-xs font-semibold tracking-widest uppercase hover:border-prime-gold hover:text-prime-gold transition-colors hover-trigger flex items-center justify-center">
+                                            Inquire Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </section>
+            );
+        };
+
+        // --- Footer Component ---
+        const Footer = () => {
+            const [formData, setFormData] = useState({ name: '', message: '' });
+            const [error, setError] = useState('');
+
+            const handleWhatsApp = (e) => {
+                e.preventDefault();
+                if (!formData.name.trim()) {
+                    setError('Please enter your name to connect.');
+                    return;
+                }
+                const text = `Hello Ashish, I am ${formData.name}. ${formData.message}`;
+                window.open(`https://wa.me/918696996609?text=${encodeURIComponent(text)}`, '_blank');
+                setError('');
+            };
+
+            const handleCall = (e) => {
+                e.preventDefault();
+                window.location.href = 'tel:+918696996609';
+            };
+
+            return (
+                <footer id="connect" className="bg-prime-ink text-prime-pearl py-24 md:py-32 px-6 md:px-12 relative overflow-hidden">
+                    {/* Subtle background decoration */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-prime-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-16 relative z-10">
+                        <div className="w-full md:w-1/2">
+                            <h2 className="font-serif text-5xl md:text-7xl mb-6 leading-tight">Ready to <br/><span className="italic text-prime-gold">Elevate?</span></h2>
+                            <p className="text-prime-pearl/60 max-w-sm mb-10 text-sm font-light">Bypass the delays. Connect with Ashish directly to claim your elite space in Jaipur.</p>
+                            
+                            {/* Inquiry Form */}
+                            <form className="max-w-md space-y-6">
+                                <div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Your Name *"
+                                        value={formData.name}
+                                        onChange={(e) => { setFormData({...formData, name: e.target.value}); setError(''); }}
+                                        className="w-full bg-transparent border-b border-prime-pearl/20 pb-3 text-prime-pearl placeholder-prime-pearl/40 focus:outline-none focus:border-prime-gold transition-colors font-light text-sm"
+                                    />
+                                    {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+                                </div>
+                                <div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="What are you looking for? (Optional)"
+                                        value={formData.message}
+                                        onChange={(e) => setFormData({...formData, message: e.target.value})}
+                                        className="w-full bg-transparent border-b border-prime-pearl/20 pb-3 text-prime-pearl placeholder-prime-pearl/40 focus:outline-none focus:border-prime-gold transition-colors font-light text-sm"
+                                    />
+                                </div>
+                                
+                                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                                    <button 
+                                        onClick={handleWhatsApp}
+                                        className="px-6 py-3 bg-prime-gold text-prime-ink text-xs font-semibold tracking-widest uppercase hover:bg-white transition-colors hover-trigger flex items-center justify-center gap-2"
+                                    >
+                                        WhatsApp
+                                    </button>
+                                    <button 
+                                        onClick={handleCall}
+                                        className="px-6 py-3 border border-prime-pearl/30 text-prime-pearl text-xs font-semibold tracking-widest uppercase hover:border-prime-gold hover:text-prime-gold transition-colors hover-trigger flex items-center justify-center gap-2"
+                                    >
+                                        Call Directly
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div className="w-full md:w-1/3 flex flex-col gap-12 pt-4">
+                            <div>
+                                <h4 className="text-prime-gold text-[10px] tracking-[0.2em] uppercase mb-4">Corporate Office</h4>
+                                <p className="text-prime-pearl/80 font-serif text-xl leading-relaxed">
+                                    SM Tower 3 and 6<br/>
+                                    Baba market DCM<br/>
+                                    Vaishali Nagar, Jaipur<br/>
+                                    Rajasthan, India
+                                </p>
+                            </div>
+                            <div>
+                                <h4 className="text-prime-gold text-[10px] tracking-[0.2em] uppercase mb-4">Connect</h4>
+                                <div className="flex flex-col space-y-3 text-prime-pearl/80 text-sm font-light">
+                                    <a href="https://instagram.com/smprimerealty" target="_blank" rel="noreferrer" className="hover:text-prime-gold transition-colors hover-trigger flex items-center gap-2 w-fit">
+                                        <span>@smprimerealty</span> (Instagram)
+                                    </a>
+                                    <a href="tel:+918696996609" className="hover:text-prime-gold transition-colors hover-trigger w-fit">
+                                        +91 8696996609
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-prime-pearl/10 flex flex-col md:flex-row justify-between items-center text-[10px] tracking-widest text-prime-pearl/40 uppercase">
+                        <p>© 2026 SM Prime Realty.</p>
+                        <p className="mt-4 md:mt-0">Curated with precision.</p>
+                    </div>
+                </footer>
+            );
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [loading, setLoading] = useState(true);
+
+            // Initialize Lenis Smooth Scroll
+            useEffect(() => {
+                const lenis = new Lenis({
+                    duration: 1.2,
+                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // expoOut
+                    direction: 'vertical',
+                    gestureDirection: 'vertical',
+                    smooth: true,
+                    smoothTouch: false,
+                    touchMultiplier: 2,
+                });
+
+                function raf(time) {
+                    lenis.raf(time);
+                    requestAnimationFrame(raf);
+                }
+                requestAnimationFrame(raf);
+
+                // Connect GSAP ScrollTrigger to Lenis
+                lenis.on('scroll', ScrollTrigger.update);
+                gsap.ticker.add((time)=>{
+                    lenis.raf(time * 1000);
+                });
+                gsap.ticker.lagSmoothing(0, 0);
+
+                return () => {
+                    lenis.destroy();
+                    gsap.ticker.remove(lenis.raf);
+                };
+            }, []);
+
+            return (
+                <div className="relative selection:bg-prime-gold/30 selection:text-prime-ink">
+                    <CustomCursor />
+                    {loading && <Preloader setLoading={setLoading} />}
+                    
+                    <Navbar />
+
+                    <main className={loading ? 'opacity-0' : 'opacity-100 transition-opacity duration-1000'}>
+                        <Hero />
+                        <Marquee />
+                        <Vision />
+                        <Founder />
+                        <Amenities />
+                        <Portfolio />
+                    </main>
+
+                    <Footer />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
